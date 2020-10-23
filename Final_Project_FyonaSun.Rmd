@@ -1,0 +1,949 @@
+---
+title: "Final_Project_FyonaSun"
+author: "Fyona Sun"
+date: "2/10/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+auction=read_csv('./online-auctions-dataset/auction.csv')
+head(auction)
+dim(auction)
+sapply(auction, class)
+```
+
+The data set includes 10681 observations and 9 variables
+auctionid: unique identifier of an auction
+bid: the proxy bid placed by a bidder
+bidtime: the time in days that the bid was placed, from the start of the auction
+bidder: eBay username of the bidder
+bidderrate: eBay feedback rating of the bidder
+openbid: the opening bid set by the seller
+price: the closing price that the item sold for (equivalent to the second highest bid + an increment)
+item: auction item
+auction_type
+
+Understanding eBay auction policy
+It's important to understand how eBay auction policy works before conducting further analysis. I found this explanation easy to understand.
+
+The website helps to answer the following questions:
+
+What's the relationship between bids and bidtime? Poeple have to bid higher than current price, which is the second highest bid+increment. If someone places a bid much higher than current price, eBay will only use part of his/her bid(second highest bid+increment) as the new current price. People can bid as long as their bid is higher than current price. Therefore, as bidtime increases, we sometimes see bids that are lower than previous bids. People will be notified when they are outbid, so they may increase their max bids to remain the higher bidder.
+
+What's the relationship between bids and closing price? Closing price=second highest bid+increment or highest bid in some cases when second highest bid+increment is greater than the thrid highest bid. For example, if third highest bid is 8 and second highest bid is 10, you can bid 10.01 and if no one's bid is higher than yours, you get the item by paying 10.01 instead of 10+increment(which is 10.5)
+
+Person who placed the highest bid gets the item but how much he/she needs to pay in most cases depends on the second highest bid.
+## Exploring the dataset
+
+```{r}
+## function bid.incr(price)
+bid.incr <- 
+       function(price) 
+           { bidint <- c(0,0.99,4.99,24.99,99.99,249.99,499.99,999.99,2499.99,4999.99)
+               ## interval of prices
+             inc <- c(0.05,0.25,0.5,1,2.5,5,10,25,50,100)
+               ## increments of price for particular interval
+             inc[findInterval(price,bidint)]
+           }
+############################################################
+##########            make livebids              ###########
+############################################################
+
+## function recover.livebids(bids,bidder,openbid,winningbid)
+## This function reconstructs the sequence of livebids by 
+## inputing the raw bids,bidder IDs and opening bid
+
+recover.livebids <- 
+       function(bids,bidder,openbid,winningbid)
+           { nbid <- length(bids)
+             if (nbid==1) { live <- openbid
+                            live
+                           }
+             else {
+                   if (nbid==2) {live <- numeric(nbid)
+                                 live[1] <- openbid
+                                 live[nbid] <- winningbid
+                                 live}
+
+                   else { live <- numeric(nbid)
+                          maxbid <- bids[1]
+                          live[1] <- openbid
+                          live[nbid] <- winningbid
+                          currentprice <- bids[1]
+                          maxbidder <- bidder[1]
+                          for (i in 2:(nbid-1)) 
+                                { newbid <- bids[i]
+                                  newbidder <- bidder[i]
+                                  if (newbid > maxbid) { if (!(identical(newbidder,maxbidder))) 
+                                                             { incr <- bid.incr(maxbid)
+                                                               if (newbid < maxbid+incr)  currentprice <- newbid
+                                                               else currentprice <- maxbid+incr
+                                                               maxbid <- newbid         
+                                                               maxbidder <- newbidder
+                                                              } 
+                                                         else {maxbid <- newbid 
+                                                               maxbidder <- maxbidder
+                                                               }
+                                                       }
+                                  else {if (newbid < maxbid) { incr <- bid.incr(newbid)
+                                                               if (newbid+incr>=maxbid) currentprice <- maxbid
+                                                               else currentprice <- newbid+incr
+                                                               maxbid <- maxbid
+                                                               maxbidder <- maxbidder
+                                                              }
+                                         else { if (!(identical(newbidder,maxbidder))) 
+                                                                            {currentprice <- maxbid
+                                                                             maxbid <- maxbid
+                                                                             maxbidder <- maxbidder
+                                                                            }
+                                                else {currentprice <- currentprice
+                                                      maxbid <- maxbid
+                                                      maxbidder <- maxbidder
+                                                      }                                              
+                                              }
+                                        }
+                                 live[i] <- currentprice
+                               }
+                         live
+                        }
+                  }
+             }
+
+```
+
+```{r}
+auction=read_csv('./online-auctions-dataset/auction.csv')
+swarovski=read_csv('./online-auctions-dataset/swarovski.csv')
+head(auction)
+head(swarovski)
+
+dim(auction)
+dim(swarovski)
+summary(auction)
+summary(swarovski)
+
+levels(as.factor(auction$item))
+#"Cartier wristwatch"  "Palm Pilot M515 PDA" "Xbox game console"  
+levels(as.factor(auction$auction_type))
+#"3 day auction" "5 day auction" "7 day auction"
+```
+
+## data manipulation
+
+```{r}
+library(tidyverse)
+library(zoo)
+#change characteristic varibale to dummy variables
+auction$is_3day<- ifelse(auction$auction_type=='3 day auction',1,0)
+auction$is_5day<- ifelse(auction$auction_type=='5 day auction',1,0)
+auction$is_7day<- ifelse(auction$auction_type=='7 day auction',1,0)
+auction$is_catier<- ifelse(auction$item=='Cartier wristwatch',1,0)
+auction$is_palm<- ifelse(auction$item=='Palm Pilot M515 PDA',1,0)
+auction$is_xbox<- ifelse(auction$item=='Xbox game console',1,0)
+#add a few statistical variables
+## winning bid, number of bids & average bid per auction
+u<-unique(auction$auctionid)
+winner<-rep(0,nrow(auction))
+livebid<- rep(0,nrow(auction))
+average<-rep(0,nrow(auction))
+sd<- rep(0,nrow(auction))
+num.bids<-rep(0,nrow(auction))
+
+for (i in u){
+        indexes<-which(auction$auctionid == i)
+        cur.average<-sum(auction$bid[indexes])/length(indexes)
+        cur.dev<- sd(auction$bid[indexes])
+        current<- recover.livebids(auction$bid[indexes],auction$bidder[indexes],auction$openbid[indexes],auction$price[indexes])
+        j<-0
+        for (k in indexes){
+                j<- j+1
+                winner[k]<-ifelse(auction$bid[k]==auction$price[k], 1 , 0)
+                num.bids[k]<-length(indexes)
+                average[k]<-cur.average
+                sd[k]<- cur.dev
+                livebid[k]<- current[j]
+        }
+
+}
+auction$winner<-winner
+auction$avg.bid<-average
+auction$sd.bid<- sd
+auction$num.bids<-num.bids
+auction$livebid<- livebid
+
+## length of auction (number of days)
+auction$length<-rep(0,nrow(auction))
+idx3<-which(auction$auction_type == "3 day auction")
+auction$length[idx3]<-3
+idx5<-which(auction$auction_type == "5 day auction")
+auction$length[idx5]<-5
+idx7<-which(auction$auction_type == "7 day auction")
+auction$length[idx7]<-7
+
+## normalized bidding time (when bid was placed over auction length)
+auction$time.fraction<-auction$bidtime/auction$length
+
+## normalized bidding price (bid over winning price)
+auction$bid.fraction<-auction$bid/auction$price
+
+## bid distance from open bid
+auction<-mutate(auction,dist.open=(bid-openbid)/bid)
+
+## bid distance from average bid
+auction<-mutate(auction,dist.avg=(bid-avg.bid)/avg.bid)
+
+## add sequence of each bid
+auction$num_current_bids <- ave(auction$bidtime, auction$auctionid, FUN = seq_along)
+
+## add time difference
+auction$time.diff <- ave(auction$bidtime, auction$auctionid, FUN = function(x) c(0,diff(x)))
+auction$time.diff[is.na(auction$time.diff)]<- 0 
+
+## add bid difference
+auction$bid.diff <- ave(auction$bid, auction$auctionid, FUN = function(x) c(0,diff(x)))
+auction$bid.diff[is.na(auction$bid.diff)]<- 0 
+
+## add bid velocity
+auction$velocity<- auction$bid.diff/auction$time.diff
+auction$velocity[is.infinite(auction$velocity)]<- 0 
+auction$velocity[is.nan(auction$velocity)]<- 0 
+
+##add lag
+auction$livebid.lag<- ave(auction$livebid, factor(auction$auctionid), FUN=function(x) c(NA,x[1:(length(x)-1)]))
+auction$livebid.lag<- na.fill(auction$livebid.lag,0)
+```
+
+## Exploring the data
+
+There are 627 item in the data set in total. Since the bidders do not know what others have bid and might be placing mulptiple bids after being notified that they were outbid, the last bid is not necessaily the one who get the item. 
+
+```{r}
+library(dplyr)
+#get rid of the outlier
+#1639672910
+auction<-auction[auction$auctionid!="1639672910",]
+
+closing_price<- auction %>% select(auctionid,openbid,price,auction_type,item)%>%
+  group_by(auction$auctionid) %>% 
+  summarise(openbid=max(openbid),price=max(price),auction_type=max(auction_type),item=max(item))
+# text theme for every plot in this project
+text_theme <- theme(text = element_text(size = 10, 
+                            family = "Verdana", 
+                            face = "plain"),
+                    plot.title = element_text(hjust = 0.5))
+
+# distribution of prices
+ggplot(closing_price, 
+       aes(x = price)) + 
+  geom_histogram(binwidth = 85, 
+                 aes(fill = item), 
+                 col = "white") +
+  geom_vline(aes(xintercept = mean(auction$price)), 
+             col = "orange",
+             size = 0.5) +
+  labs(title = "Distribution of prices",
+       x = "Final prices",
+       y = "Frequency") +
+  text_theme
+
+
+ggplot(auction, 
+       aes(x = time.fraction)) + 
+  geom_histogram(binwidth = 0.01,
+                 col = "white") +
+  labs(title = "Distribution of Bid Time",
+       x = "Bid time ",
+       y = "Frequency") +
+  text_theme
+```
+
+```{r}
+# distribution of auction types
+ggplot(closing_price, 
+       aes(x = factor(1), 
+           fill = closing_price$auction_type)) +
+  geom_bar(width = 3) +
+  ggtitle("Auctions' bid type distribution") +
+  coord_polar(theta = "y") +
+  labs(fill= "Type of auction") +
+  scale_fill_brewer(palette = "YlGnBu") +
+  xlab(NULL) + ylab(NULL) +
+  text_theme
+# few ggplot complements 
+bar_auction_type <- geom_bar(aes(fill = auction$auction_type), 
+                             stat = "count")
+
+ggplot(closing_price, 
+       aes(x = factor(1), 
+           fill = item)) +
+  geom_bar(width = 3) +
+  ggtitle("Auctions' item distribution") +
+  coord_polar(theta = "y") +
+  labs(fill= "Type of auction item") +
+  scale_fill_brewer(palette = "YlGnBu") +
+  xlab(NULL) + ylab(NULL) +
+  text_theme
+# few ggplot complements 
+bar_auction_type <- geom_bar(aes(fill = auction$auction_type), 
+                             stat = "count")
+
+# relationship between final price per auction and auction type
+ggplot(closing_price, 
+       aes(x = auction_type, y = price)) + 
+  geom_boxplot(aes(fill = auction_type), 
+           color = "darkgrey")  +
+  labs(title = "Final price per action", 
+       x = "Type of an auction", 
+       y = "Final price") +
+  guides(fill = F) +
+  scale_fill_brewer(palette = "YlGnBu") + 
+  text_theme + 
+  coord_cartesian(ylim = c(0, 1000)) # few outliers masked
+```
+
+## data manipulation
+
+```{r}
+library(tidyverse)
+library(zoo)
+#change characteristic varibale to dummy variables
+auction$is_3day<- ifelse(auction$auction_type=='3 day auction',1,0)
+auction$is_5day<- ifelse(auction$auction_type=='5 day auction',1,0)
+auction$is_7day<- ifelse(auction$auction_type=='7 day auction',1,0)
+auction$is_catier<- ifelse(auction$item=='Cartier wristwatch',1,0)
+auction$is_palm<- ifelse(auction$item=='Palm Pilot M515 PDA',1,0)
+auction$is_xbox<- ifelse(auction$item=='Xbox game console',1,0)
+#add a few statistical variables
+## winning bid, number of bids & average bid per auction
+u<-unique(auction$auctionid)
+winner<-rep(0,nrow(auction))
+livebid<- rep(0,nrow(auction))
+average<-rep(0,nrow(auction))
+sd<- rep(0,nrow(auction))
+num.bids<-rep(0,nrow(auction))
+
+for (i in u){
+        indexes<-which(auction$auctionid == i)
+        cur.average<-sum(auction$bid[indexes])/length(indexes)
+        cur.dev<- sd(auction$bid[indexes])
+        current<- recover.livebids(auction$bid[indexes],auction$bidder[indexes],auction$openbid[indexes],auction$price[indexes])
+        j<-0
+        for (k in indexes){
+                j<- j+1
+                winner[k]<-ifelse(auction$bid[k]==auction$price[k], 1 , 0)
+                num.bids[k]<-length(indexes)
+                average[k]<-cur.average
+                sd[k]<- cur.dev
+                livebid[k]<- current[j]
+        }
+
+}
+auction$winner<-winner
+auction$avg.bid<-average
+auction$sd.bid<- sd
+auction$num.bids<-num.bids
+auction$livebid<- livebid
+
+## length of auction (number of days)
+auction$length<-rep(0,nrow(auction))
+idx3<-which(auction$auction_type == "3 day auction")
+auction$length[idx3]<-3
+idx5<-which(auction$auction_type == "5 day auction")
+auction$length[idx5]<-5
+idx7<-which(auction$auction_type == "7 day auction")
+auction$length[idx7]<-7
+
+## normalized bidding time (when bid was placed over auction length)
+auction$time.fraction<-auction$bidtime/auction$length
+
+## normalized bidding price (bid over winning price)
+auction$bid.fraction<-auction$bid/auction$price
+
+## bid distance from open bid
+auction<-mutate(auction,dist.open=(bid-openbid)/bid)
+
+## bid distance from average bid
+auction<-mutate(auction,dist.avg=(bid-avg.bid)/avg.bid)
+
+## add sequence of each bid
+auction$num_current_bids <- ave(auction$bidtime, auction$auctionid, FUN = seq_along)
+
+## add time difference
+auction$time.diff <- ave(auction$bidtime, auction$auctionid, FUN = function(x) c(0,diff(x)))
+auction$time.diff[is.na(auction$time.diff)]<- 0 
+
+## add bid difference
+auction$bid.diff <- ave(auction$bid, auction$auctionid, FUN = function(x) c(0,diff(x)))
+auction$bid.diff[is.na(auction$bid.diff)]<- 0 
+
+## add bid velocity
+auction$velocity<- auction$bid.diff/auction$time.diff
+auction$velocity[is.infinite(auction$velocity)]<- 0 
+auction$velocity[is.nan(auction$velocity)]<- 0 
+
+##add lag
+auction$livebid.lag<- ave(auction$livebid, factor(auction$auctionid), FUN=function(x) c(NA,x[1:(length(x)-1)]))
+auction$livebid.lag<- na.fill(auction$livebid.lag,0)
+```
+
+
+```{r}
+head(auction,50)
+```
+```{r}
+auction$winner<-as.factor(auction$winner)
+######## PLOTS
+# text theme for every plot in this project
+text_theme <- theme(text = element_text(size = 10, 
+                            family = "Verdana", 
+                            face = "plain"),
+                    plot.title = element_text(hjust = 0.5))
+
+# distribution of bids over item and aution type
+ggplot(auction,aes(x =item, fill= winner))+
+        geom_bar()+
+        facet_wrap(~auction_type)+
+        xlab("Auction Item")+ ylab("Total Count")+
+        text_theme
+
+# check if no. of bids has predictive power
+# hypothesis - As number of bids per item increases chance of winning drops
+
+ggplot(auction,aes(x = num.bids, fill= winner))+
+        geom_histogram(binwidth = 20)+
+        facet_wrap(~auction_type)+
+        xlab("Number of Bids per Auction")+ ylab("Total Count")+
+        text_theme
+
+# check if distance from open bid has predictive power
+# hypothesis - Bids much higher than openning bid have higher chance of winning
+ggplot(auction)+
+        geom_point(aes(x = dist.open,y=price, color= winner))+
+        facet_wrap(~auction_type)+
+        xlab("Distance form Openning Bid")+ ylab("Final Sale Price")+
+        text_theme
+
+
+# check if distance from average bid has predictive power
+# hypothesis - Bids below the average bid have zero chance of winning
+
+ggplot(auction)+
+        geom_point(aes(x =dist.avg,y=price, color= winner))+
+        facet_wrap(~auction_type)+
+        xlab("Distance form Average Bid")+ ylab("Final Sale Price")+
+        text_theme
+
+
+# check if time fraction has predictive power
+# hypothesis - Bids placed toward the end of the auction have higher chance of winning
+
+ggplot(auction)+
+        geom_point(aes(x =time.fraction,y=price, color= winner))+
+        facet_wrap(~auction_type)+
+        xlab("Bidding Time")+ ylab("Final Sale Price")+
+        text_theme
+
+```
+
+### modeling a single auction using Smoothing splines
+```{r}
+#Example of a 7-day auction
+sevenday<- auction[which(auction$length==7),]
+ggplot(sevenday, aes(x=bidtime, y=bid, color= item)) +
+   geom_point() + 
+   scale_fill_brewer(palette = "YlGnBu") + 
+   xlab("bid time") +
+   ggtitle("Scatter Plot of 7-day auctions")+
+   expand_limits(x=7)+
+   text_theme
+
+sample3<- auction[which(auction$auctionid=='1639226378'),]
+ggplot(sample3, aes(x=bidtime, y=bid)) +
+   geom_line() + 
+   xlab("bid time") +
+   ggtitle("Sample Auction 1639226378")+
+   expand_limits(x=7)+
+   text_theme
+
+ggplot(sample3, aes(x=bidtime, y=livebid)) +
+   geom_line() + 
+   xlab("bid time") +
+   ggtitle("Sample Auction 1639226378")+
+   expand_limits(x=7)+
+   text_theme
+```
+
+## model one singel auction using non-linear polynomial regression
+```{r}
+library(splines)
+library(gam)
+
+rss <- rep(0, 7)
+for (i in 1:7) {
+    fit <- lm(bid ~ poly(bidtime, i), data = sample3)
+    rss[i] <- sum(fit$residuals^2)
+}
+plot(1:7, rss, xlab = "Degree", ylab = "RSS", type = "l", col='red')
+
+
+fit.lm <- lm(bid ~ poly(bidtime,3), data = sample3)
+summary(fit.lm)
+
+bidtime.new <- seq(1, 7, by = 0.01)
+pred <- predict(fit.lm, list(bidtime = bidtime.new))
+plot(bid ~ bidtime, data = sample3, col = "darkgrey")
+lines(bidtime.new,pred, col = "red", lwd = 2)
+```
+The RSS decreases as the degree of the polynomial decreases. It achieves its minimum at degree 7. However, it diverges as the degree of polynomial increases. Thus from the plot we choose the degree of 3. 
+
+## Soomthing splines and gam
+```{r}
+rss <- rep(0, 16)
+for (i in 3:16) {
+    fit <- lm(bid ~ bs(bidtime, df = i), data = sample3)
+    rss[i] <- sum(fit$residuals^2)
+}
+plot(3:16, rss[-c(1, 2)], xlab = "Degrees of freedom", ylab = "RSS", type = "l")
+
+
+fit.spline <- lm( bid~ bs(bidtime, knots = c(5, 14)), data = sample3)
+summary(fit.spline)
+
+pred.spline <- predict(fit.spline, list(bidtime = bidtime.new))
+plot(bid ~ bidtime, data = sample3, col = "darkgrey")
+lines(bidtime.new, pred.spline, col = "orchid", lwd = 2)
+```
+```{r}
+bid<- sample3$bid
+bidtime<- sample3$bidtime
+fit.sspline <- smooth.spline(bid, bidtime,df=3)
+fit.gam<- gam(bid ~ s(bidtime,7))
+
+
+pred.sspline<- predict(fit.sspline, bidtime.new)
+pred.gam <- predict(fit.gam, list(bidtime = bidtime.new))
+plot(bid ~ bidtime, data = sample3, col = "darkgrey")
+lines(bidtime.new,pred.sspline$y, col = "red", lwd = 2)
+lines(bidtime.new,pred.gam, col = "blue", lwd = 2)
+
+summary(fit.gam)
+```
+## Add bidding pattern
+
+```{r}
+#split by auction
+duration<-1
+sLive <- split(auction$livebid,auction$auctionid)
+sTime <- split(auction$time.fraction,auction$auctionid)
+#create variables with opening and closing bid added
+numauct<-length(sLive)
+sLiveEnds<-list(0);length(sLiveEnds)<-numauct
+sTimeEnds<-list(0); length(sTimeEnds)<-numauct
+sLiveStart<-list(0); length(sLiveStart)<-numauct
+sTimeStart<-list(0); length(sTimeStart)<-numauct
+sTimeEndsTemp<-list(0); length(sTimeStart)<-numauct
+sTimeStartTemp<-list(0); length(sTimeStartTemp)<-numauct
+for (j in 1:numauct){
+     sLiveEnds[[j]]<-c(min(sLive[[j]]),sLive[[j]],max(sLive[[j]]))
+     sTimeEnds[[j]]<-c(0,sTime[[j]],duration)
+     sLiveStart[[j]]<-c(min(sLive[[j]]),sLive[[j]])
+     sTimeStart[[j]]<-c(0,sTime[[j]])
+     sTimeEndsTemp[[j]]<-c(0.000001,sTime[[j]],duration)
+     sTimeStartTemp[[j]]<-c(0.000001,sTime[[j]])
+     }
+
+delta<- 0.01
+epsilon<-0.000001
+num.mod<-4  ##number of models
+w.x<-.5
+w.y<-.5
+
+
+########################
+##SSE for Diffent Models
+########################
+n<-length(sLive)  ##number of auctions I'm looking at 
+wSSE.range<-array(0,c(n,num.mod))  
+wSSE.var<-array(0,c(n,num.mod))  
+models.range<-array(0,n)
+models.var<-array(0,n)
+
+for (i in 1:n){
+
+## Exponential Model (Model 1)
+x<-seq(0,duration,by=.01)
+reg1<-lm(log(sLiveEnds[[i]])~ sTimeEnds[[i]])
+fit1y<-exp(as.vector(reg1$coefficients)[1])*exp(as.vector(reg1$coefficients)[2]*sTimeEnds[[i]])
+fit1x<-log(sLiveEnds[[i]]/exp(as.vector(reg1$coefficients)[1]))/as.vector(reg1$coefficients)[2]
+fit1.SSEy<- sum((fit1y-sLiveEnds[[i]])^2)
+fit1.SSEx<- sum((fit1x-sTimeEnds[[i]])^2)
+wSSE.range[i,1]<- (w.y*fit1.SSEy)/diff(range(sLive[[i]]))^2 + (w.x*fit1.SSEx)/diff(range(sTimeEnds[[i]]))^2
+wSSE.var[i,1]<- (w.y*fit1.SSEy)/var(sLive[[i]]) + (w.x*fit1.SSEx)/var(sTimeEnds[[i]])
+
+## Invere Exponential Model (Model 2) 
+x<-seq(0,max(sLive[[i]]),by=.1)
+reg2<-lm(log(sTimeEndsTemp[[i]])~ sLiveEnds[[i]])
+fit2y<-log(sTimeEndsTemp[[i]]/exp(as.vector(reg2$coefficients)[1]))  /as.vector(reg2$coefficients)[2]
+fit2x<-exp(as.vector(reg2$coefficients)[1]) * exp(as.vector(reg2$coefficients)[2]*sLiveEnds[[i]])
+fit2.SSEy<- sum((fit2y-sLiveEnds[[i]])^2)
+fit2.SSEx<- sum((fit2x-sTimeEnds[[i]])^2)
+wSSE.range[i,2]<- (w.y*fit2.SSEy)/diff(range(sLive[[i]]))^2 + (w.x*fit2.SSEx)/diff(range(sTimeEnds[[i]]))^2
+wSSE.var[i,2]<- (w.y*fit2.SSEy)/var(sLive[[i]]) + (w.x*fit2.SSEx)/var(sTimeEnds[[i]])
+
+## Logistic Growth (Model 3) 
+x<-seq(0,duration,by=.01)
+reg3<- lm( log((max(sLiveStart[[i]])+delta)/sLiveStart[[i]]-1) ~ sTimeStart[[i]] )
+fit3y<- (max(sLiveEnds[[i]])+delta)/(1+exp(as.vector(reg3$coefficients)[1])*exp(as.vector(reg3$coefficients)[2]*sTimeEnds[[i]]))
+fit3x<- (log( (max(sLiveEnds[[i]])+delta)/sLiveEnds[[i]] - 1) - log (exp(as.vector(reg3$coefficients)[1])))/as.vector(reg3$coefficients)[2]
+fit3.SSEy<- sum((fit3y-sLiveEnds[[i]])^2)
+fit3.SSEx<- sum((fit3x-sTimeEnds[[i]])^2)
+wSSE.range[i,3]<- (w.y*fit3.SSEy)/diff(range(sLive[[i]]))^2 + (w.x*fit3.SSEx)/diff(range(sTimeEnds[[i]]))^2
+wSSE.var[i,3]<- (w.y*fit3.SSEy)/var(sLive[[i]]) + (w.x*fit3.SSEx)/var(sTimeEnds[[i]])
+
+## Inverse Logistic Growth (Model 4)
+x<-seq(0,max(sLive[[i]]),by=.1)
+reg4<- lm( log((duration+epsilon)/sTimeEndsTemp[[i]]-1) ~ sLiveEnds[[i]])
+fit4y<- (log(((duration+epsilon)/sTimeEndsTemp[[i]])-1) - as.vector(reg4$coefficients)[1]) /as.vector(reg4$coefficients)[2]
+fit4x<- (duration+epsilon)/(1+exp(as.vector(reg4$coefficients)[1])*exp(as.vector(reg4$coefficients)[2]*sLiveEnds[[i]]))
+fit4.SSEy<- sum((fit4y-sLiveEnds[[i]])^2)
+fit4.SSEx<- sum((fit4x-sTimeEnds[[i]])^2)
+wSSE.range[i,4]<- (w.y*fit4.SSEy)/diff(range(sLive[[i]]))^2 + (w.x*fit4.SSEx)/diff(range(sTimeEnds[[i]]))^2
+wSSE.var[i,4]<- (w.y*fit4.SSEy)/var(sLive[[i]]) + (w.x*fit4.SSEx)/var(sTimeEnds[[i]])
+
+}
+
+```
+
+```{r error=TRUE}
+for (k in 1:n){
+     wSSE.range[k,][wSSE.range[k,]=="NaN"]=(min(na.omit(wSSE.range[k,])+1))
+     wSSE.var[k,][wSSE.var[k,]=="NaN"]=(min(na.omit(wSSE.var[k,])+1))
+     models.range[k]<-(1:num.mod)[min(wSSE.range[k,])==wSSE.range[k,]]
+     models.var[k]<-(1:num.mod)[min(wSSE.var[k,])==wSSE.var[k,]]
+}
+(1:n)[models.range!=models.var]
+table(models.range)
+table(models.var)
+
+numauct<-length(sLive)
+x<-seq(0,duration,by=.1)
+x[1]<-min(x)+.001
+x[length(x)]<-max(x)-.01
+numplot<-length(x)
+ypred <- yfdpred7 <- ysdpred7 <- array(0,c(numauct,numplot))
+
+models<- models.range
+
+
+################################################################
+##Creating Fitted Data Based on Selected (by SSE criteria) Model
+################################################################
+## Matrix of data
+numauct<-length(sLive)
+x<-seq(0,duration,by=.05)
+x[1]<-min(x)+.001
+x[length(x)]<-max(x)-.01
+numplot<-length(x)
+ypred <- yfdpred7 <- ysdpred7 <- array(0,c(numauct,numplot))
+
+models7<- models<- models.range   ###IMPT: THIS IS THE SSE CRITERIA THAT I AM USING (either models.range or models.var) 
+
+for (i in 1:n){
+if (models[i]==1){
+reg1<-lm(log(sLiveEnds[[i]])~ sTimeEnds[[i]])
+ypred[i,]<-exp(as.vector(reg1$coefficients)[1])*exp(as.vector(reg1$coefficients)[2]*x)
+yfdpred7[i,]<-exp(as.vector(reg1$coefficients)[1])*as.vector(reg1$coefficients)[2]*exp(as.vector(reg1$coefficients)[2]*x)
+ysdpred7[i,]<-exp(as.vector(reg1$coefficients)[1])*(as.vector(reg1$coefficients)[2])^2*exp(as.vector(reg1$coefficients)[2]*x)
+}
+
+if (models[i]==2){
+reg2<-lm(log(sTimeEndsTemp[[i]])~ sLiveEnds[[i]])
+ypred[i,]<-log(x/exp(as.vector(reg2$coefficients)[1]))  /as.vector(reg2$coefficients)[2]
+yfdpred7[i,]<-1/(as.vector(reg2$coefficients)[2]*x)
+ysdpred7[i,]<- -1/(as.vector(reg2$coefficients)[2]*x^2)
+}
+
+if (models[i]==3){
+reg3<- lm( log((max(sLiveStart[[i]])+delta)/sLiveStart[[i]]-1) ~ sTimeStart[[i]] )
+ypred[i,]<- (max(sLive[[i]])+delta)/(1+exp(as.vector(reg3$coefficients)[1])*exp(as.vector(reg3$coefficients)[2]*x))
+yfdpred7[i,]<- -(max(sLive[[i]])+delta)*exp(as.vector(reg3$coefficients)[1])*as.vector(reg3$coefficients)[2]*exp(as.vector(reg3$coefficients)[2]*x)/
+	  (1+exp(as.vector(reg3$coefficients)[1])*exp(as.vector(reg3$coefficients)[2]*x))^2
+ysdpred7[i,]<- -(max(sLive[[i]])+delta)*exp(as.vector(reg3$coefficients)[1])*(as.vector(reg3$coefficients)[2])^2*exp(as.vector(reg3$coefficients)[2]*x)*
+           (1-exp(as.vector(reg3$coefficients)[1])*exp(as.vector(reg3$coefficients)[2]*x))/
+	   (1+exp(as.vector(reg3$coefficients)[1])*exp(as.vector(reg3$coefficients)[2]*x))^3
+}
+
+if (models[i]==4){
+reg4<- lm( log((duration+epsilon)/sTimeEndsTemp[[i]]-1) ~ sLiveEnds[[i]])
+ypred[i,]<- (log(((duration+epsilon)/x)-1) - as.vector(reg4$coefficients)[1]) /as.vector(reg4$coefficients)[2]
+yfdpred7[i,]<- -(duration+epsilon)/(as.vector(reg4$coefficients)[2]*(x^2)*(((duration+epsilon)/x)-1))
+ysdpred7[i,]<- ((duration+epsilon)*((duration+epsilon)-2*x))/(as.vector(reg4$coefficients)[2]*(x^4)*(((duration+epsilon)/x)-1)^2)
+}
+}
+```
+
+```{r}
+plot(x,ypred[1,],type="l",xlim=c(0,1),ylim=c(0,max(ypred)),xlab="Bid Time",ylab="Price",col='red')
+for (i in 2:numauct)
+lines(x,ypred[i,], lty=3)
+
+lines(x,ypred[86,], col='yellow')
+lines(x,ypred[61,], col='green')
+lines(x,ypred[9,], col='purple')
+
+legend(0, 2800, legend=c("model 1", "model 2", "model 3", "model 4"),
+       col=c("red", "yellow", 'green', 'purple'), lty=1, cex=0.8)
+
+table(models)
+```
+
+
+## Static model
+
+```{r}
+library(dplyr)
+library(caret)
+# Split data into training and testing
+set.seed(123)
+Train <- createDataPartition(u, p = 0.7, list = FALSE)
+Train.auction<- auction$auctionid %in% u[Train]
+training <- auction[Train.auction,]
+testing <- auction[!Train.auction,]
+```
+## static prediction
+
+Static competition features are known at the outset of the auction and do not change during the auction;
+- opening price of concurrent auctions
+- duration of concurrent auctions
+- sellers’ feedback of concurrent auctions
+```{r}
+library(ggplot2)
+library(caret)
+
+#######Static Model Predicting the End Price######
+set.seed(123)
+train_control<- trainControl(method = 'cv',number=10,repeats = 3)
+
+#fit auction with linear model
+static.lm <- train(price~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day, data=training, trControl=train_control, method="lm",na.action=na.exclude)
+static.lm
+
+static.pred.lm<- predict(static.lm, testing)
+postResample(pred = static.pred.lm, obs = testing$livebid)
+
+##fit auction with knn model
+static.knn<- train(price ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day, data=training, trControl=train_control, method="knn",na.action=na.exclude)
+static.knn
+plot(static.knn)
+
+static.pred.knn<- predict(static.knn, testing)
+postResample(pred = static.pred.knn, obs = testing$livebid)
+
+```
+
+```{r}
+library(ggplot2)
+library(caret)
+
+#######Static Model######
+set.seed(123)
+
+train_control<- trainControl(method = 'cv',number=10,repeats = 3)
+
+#fit auction with linear model
+static.lm <- train(livebid ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day, data=training, trControl=train_control, method="lm",na.action=na.exclude)
+static.lm
+
+static.pred.lm<- predict(static.lm, testing)
+postResample(pred = static.pred.lm, obs = testing$livebid)
+
+##fit auction with knn model
+static.knn<- train(livebid ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day, data=training, trControl=train_control, method="knn",na.action=na.exclude)
+static.knn
+plot(static.knn)
+
+static.pred.knn<- predict(static.knn, testing)
+postResample(pred = static.pred.knn, obs = testing$livebid)
+
+```
+
+```{r}
+#######Static + Evolving info Model######
+#current price, time left, current number of bids, current number of bidders
+
+#fit auction with linear model
+se.lm <- train(livebid ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day+livebid.lag+num_current_bids+avg.bid+sd.bid+num.bids+time.fraction, data=training, trControl=train_control, method="lm",na.action=na.exclude)
+static.lm
+
+se.pred.lm<- predict(se.lm, testing)
+postResample(pred = se.pred.lm, obs = testing$livebid)
+
+##fit auction with knn model
+se.knn<- train(livebid ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day+livebid.lag+num_current_bids+avg.bid+sd.bid+num.bids+time.fraction, data=training, trControl=train_control, method="knn",na.action=na.exclude)
+static.knn
+plot(static.knn)
+
+se.pred.knn<- predict(se.knn, testing)
+postResample(pred = se.pred.knn, obs = testing$livebid)
+```
+
+
+```{r}
+#######Static + Evolving info + dynamic Model######
+#distance to 
+
+#fit auction with linear model
+sed.lm <- train(livebid ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day+livebid.lag+num_current_bids+avg.bid+sd.bid+num.bids+time.fraction+bid.fraction+dist.open+dist.avg+time.diff+bid.diff+velocity, data=training, trControl=train_control, method="lm",na.action=na.exclude)
+static.lm
+
+sed.pred.lm<- predict(sed.lm, testing)
+postResample(pred = sed.pred.lm, obs = testing$livebid)
+
+##fit auction with knn model
+sed.knn<- train(livebid ~ openbid+length+bidderrate+is_catier+is_palm+is_xbox+is_3day+is_5day+is_7day+livebid.lag+num_current_bids+avg.bid+sd.bid+num.bids+time.fraction+bid.fraction+dist.open+dist.avg+time.diff+bid.diff+velocity, data=training, trControl=train_control, method="knn",na.action=na.exclude)
+static.knn
+plot(static.knn)
+
+sed.pred.knn<- predict(sed.knn, testing)
+postResample(pred = sed.pred.knn, obs = testing$livebid)
+```
+
+
+```{r error=TRUE}
+library(ggplot2)
+library(xgboost)
+library(caret)
+
+#######XGboost Full model######
+set.seed(123)
+
+train_x<- as.matrix(training %>% select(-which(sapply(.,is.character))) %>%select(-c(livebid,auctionid)))
+
+train_y<- training$livebid
+
+test_x<- as.matrix(testing %>% select(-which(sapply(.,is.character))) %>%select(-c(livebid,auctionid)))
+
+test_y<- testing$livebid
+
+full.xg<- xgboost(data = train_x,
+                    label=train_y,
+                 booster = "gblinear",
+                 objective = "reg:linear",
+                 max.depth = 8,
+                 nround = 500,
+                 lambda = 0,
+                 lambda_bias = 0,
+                 alpha = 0, 
+                 missing=NA, 
+                 verbose = 0)
+
+
+pred.test.xgboost <- predict(full.xg,test_x, missing=NA)
+rmse <- function(error)
+{
+    sqrt(mean(error^2))
+}
+ 
+# Function that returns Mean Absolute Error
+mae <- function(error)
+{
+    mean(abs(error))
+}
+
+error<- test_y-pred.test.xgboost
+
+postResample(pred = pred.test.xgboost, obs = testing$livebid)
+```
+
+## using LSTM to predicting the bid pattern
+```{r error=TRUE}
+library(keras)
+
+lags <- function(x, k){
+    
+    lagged =  c(rep(NA, k), x[1:(length(x)-k)])
+    DF = as.data.frame(cbind(lagged, x))
+    colnames(DF) <- c( paste0('x-', k), 'x')
+    DF[is.na(DF)] <- 0
+    return(DF)
+  }
+
+lstm.train = lags(training$livebid, 1)
+lstm.test = lags(testing$livebid, 1)
+
+
+normalize <- function(train, test, feature_range = c(0, 1)) {
+    x = train
+    fr_min = feature_range[1]
+    fr_max = feature_range[2]
+    std_train = ((x - min(x) ) / (max(x) - min(x)  ))
+    std_test  = ((test - min(x) ) / (max(x) - min(x)  ))
+    
+    scaled_train = std_train *(fr_max -fr_min) + fr_min
+    scaled_test = std_test *(fr_max -fr_min) + fr_min
+    
+    return( list(scaled_train = as.vector(scaled_train), scaled_test = as.vector(scaled_test) ,scaler= c(min =min(x), max = max(x))) )
+    
+  }
+
+  
+Scaled = normalize(train, test, c(-1, 1))
+  
+y_train = lstm.train[, 2]
+x_train = lstm.train[, 1]
+y_test = lstm.test[, 2]
+x_test = lstm.test[, 1]
+  
+dim(x_train) <- c(length(x_train), 1, 1)
+dim(x_train)
+batch_size = 1
+units = 1
+# specify required arguments
+model <- keras_model_sequential() %>% 
+  layer_lstm(units=128,batch_input_shape = c(batch_size, dim(x_train)[2], dim(x_train)[3]),   stateful= TRUE)%>%
+  layer_dense(units = 32) %>% 
+  layer_dropout(0.2) %>% 
+  layer_dense(units = 1)
+
+model %>% compile(
+  optimizer_adam( lr= 0.02 , decay = 1e-6 ),
+  loss = "mse",
+  metrics = list("mean_absolute_error")
+)
+
+
+
+summary(model)
+
+
+history <- model %>% fit(
+  x_train,y_train,
+  epochs = 10,
+  batch_size = 1
+)
+
+```
+
+```{r error=TRUE}
+dim(x_test) <- c(length(x_test), 1, 1)
+yhat = model %>% predict(X, batch_size=1)
+
+postResample(pred = yhat, obs = y_test)
+```
+
+evolving competition features change during the auction, such as the 
+current price of concurrent auctions (if the price is low in other auctions, bidders may leave the focal auction) or 
+the number of bidders in concurrent auctions (bidders may feel that their chances of winning are higher in auctions with lower competition)
+
+
+price dynamic competition features capture the effect of changing dynamics in competing auctions
+
+
+

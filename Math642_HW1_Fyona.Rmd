@@ -1,0 +1,294 @@
+---
+title: "Math642_HW1_Fyona"
+author: "Fyona Sun"
+date: "1/18/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 2.8
+
+(a) Use the read.csv() function to read the data into R. Call the loaded data college. Make sure that you have the directory set to the correct location for the data.
+```{r}
+college<- read.csv(file = '~/Math642_FyonaSun/College.csv',header = TRUE, sep =',')
+summary(college)
+```
+(b) Look at the data using the fix() function. You should notice that the first column is just the name of each university. We don’t really want R to treat this as data. However, it may be handy to have these names for later. Try the following commands:
+```{r}
+rownames(college)<- college[,1]
+college<- college[,-1]
+```
+
+i. Use the summary() function to produce a numerical summary of the variables in the data set.
+ii. Use the pairs() function to produce a scatterplot matrix of the first ten columns or variables of the data. Recall that you can reference the first ten columns of a matrix A using A[,1:10].
+iii. Use the plot() function to produce side-by-side boxplots of Outstate versus Private.
+iv. Create a new qualitative variable, called Elite, by binning the Top10perc variable. We are going to divide universities into two groups based on whether or not the proportion of students coming from the top 10% of their high school classes exceeds 50 %.
+Use the summary() function to see how many elite univer- sities there are. Now use the plot() function to produce side-by-side boxplots of Outstate versus Elite.
+v. Use the hist() function to produce some histograms with differing numbers of bins for a few of the quantitative variables. You may find the command par(mfrow=c(2,2)) useful: it will divide the print window into four regions so that four plots can be made simultaneously. Modifying the arguments to this function will divide the screen in other ways.
+vi. Continue exploring the data, and provide a brief summary of what you discover.
+```{r}
+#Summary of the data
+summary(college)
+#Scatterplot matrix of the variables
+pairs(college[,1:10])
+#Boxplot of Outstate versus Private
+boxplot(college$Outstate, college$Private,names=c('Outstate','Private'),col=23:24)
+#Create a new qualitative variable
+Elite<- rep("No", nrow(college))
+Elite[college$Top10perc>50]='Yes'
+Elite<- as.factor(Elite)
+college<- data.frame(college,Elite)
+summary(college)
+#Boxplot of Outstate versus Elite
+boxplot(college$Outstate, college$Elite,names=c('Outstate','Elite'),col=25:26)
+#Histograms with differing numbers of bins
+par(mfrow=c(2,2))
+hist(college$Apps,breaks = 4,main='Apps')
+hist(college$Accept,breaks=25,main='Accept')
+hist(college$Enroll,breaks=50,main='Enroll')
+hist(college$Outstate, breaks = 100,main='Outstate')
+hist(college$Grad.Rate,main='Graduation Rate')
+```
+
+Exploring more information from the data
+1. What schools have the most students in the top 10 percent of the class? What schools have the most students in the top 25 percent of the class?
+```{r}
+#schools have the most top10 percent students
+row.names(head(college[order(college$Top10perc,decreasing = TRUE),],10))
+#schools have the most top25 percent students
+row.names(head(college[order(college$Top25perc,decreasing = TRUE),],10))
+school_with_top25<- head(college[order(college$Top25perc,decreasing = TRUE),],10)[,3:4]
+enrollment_rate<- school_with_top25$Enroll / school_with_top25$Accept
+school_with_top25<- data.frame(school_with_top25,enrollment_rate)
+```
+Comparing the top 10 school list, we can see that Yale, Duke, Princeton, and Brown University have high percentage of studetns from top 10% of high school class but not as many top 25% students. This might result from the school size or school cost. On the other hand, Bowdoin College, SUNY at Buffalo, UC Irvine has high percentage of top 25% student but not as many top 10% students which indicate that these are not top choices for top 10 students and it's possible that they are safe schools for some students. From the enrollment rate we can also see that among the 10 schools, University of California at Irvine and SUNY at Buffalo has a relatively lower enrollment rate.
+
+2. What's the key factor for alumini donation?
+```{r}
+#the accptance rate
+plot(perc.alumni ~ I(Accept/Apps), data = college, xlab='acceptance rate',ylab='perc.alumni') 
+
+#the cost of attending school
+plot(perc.alumni ~ I(Personal+Books+Room.Board+Outstate), data = college, xlab='cost',ylab='perc.alumni')
+
+#the estimated overall school expend
+plot(perc.alumni ~ I(Expend * Enroll), data = college, xlab='Expend',ylab='perc.alumni')
+
+```
+From the analysis, we found that some schools with lower acceptance rates tend to have higher donation rate, but the correlation between acceptance rate and percentage of alumini who donate is not significant. We cannot conclude that the lower accpetance rate leads to higher possible of donation. However, there is a possitive relationship between the student cost during college and the percentage of alumini donation. Students who spend more on college education are more likely to donate. Finally, there is no evidence to show that schools who spend more overall can get high percetange of donation.
+## Question 2.10
+(a) How many rows are in this data set? How many columns? What do the rows and columns represent?
+
+```{r}
+library(MASS)
+data(Boston)
+# dimension of the dataset. 506 rows and 14 colums
+dim(Boston)
+```
+Each row represent an observation of a neiborhood. Each column represent a feature regarding that neiborhood.
+(b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.
+```{r}
+pairs(Boston)
+```
+(c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
+```{r}
+Boston.corr = cor(Boston)
+Boston.corr.crim = Boston.corr[-1,1]
+print(
+  Boston.corr.crim[order(abs(Boston.corr.crim), decreasing = T)]
+)
+#visulization
+heatmap(cor(Boston, use="pairwise.complete.obs"))
+```
+From the correlation coefficients and the heatmap, the most importance factors are rad, tax, lstat, nox and indus.These 5 factors has positive relationship with the per capita crime rate.The medv, black, and dis has negative relationship with the crime rate, but the correlation is weak.
+
+(d) Do any of the suburbs of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
+```{r}
+par(mfrow=c(2,2))
+#crime rate
+summary(Boston$crim)
+hist(Boston$crim, xlab = "Crime rate", ylab="Number of Suburbs",main="Crime Rates")
+#tax rate
+summary(Boston$tax)
+hist(Boston$tax, xlab = "Property-tax rate", ylab="Number of Suburbs",main="Tax Rates")
+#pt ratio
+summary(Boston$ptratio)
+hist(Boston$ptratio, xlab ="Pupil-teacher ratio by town", ylab="Number of Suburbs",main="Pupil-teacher ratio")
+```
+The range of the crime rate is from 0.006% to 88.98% with a mean of 3.61% and a median of 0.26%. Thus there are 10.6% of the suburbs have crime rate above 10 and there are 0.79% of the suburbs have crime rate above 50. The histogram of the Tax rates shows that there are fewer neiborhoods has tax rates between 450-650, around 0.2% of the total number of the towns. Above 30% of the towns have the  pupil-teacher ratio ratio between 20-22.
+```{r}
+#crime rate
+above_10 <- subset(Boston, crim > 10)
+nrow(above_10)/ nrow(Boston)
+above_50<- subset(Boston, crim > 50)
+nrow(above_50)/ nrow(Boston)
+#tax rate
+tax_rate_between<- subset(Boston, tax > 450 & tax < 650)
+nrow(tax_rate_between)/ nrow(Boston)
+#ptratio
+ptratio_between<- subset(Boston, ptratio >=20)
+nrow(ptratio_between)/ nrow(Boston)
+```
+
+(e) How many of the suburbs in this data set bound the Charles river?
+```{r}
+summary(Boston$chas==1)
+```
+There are 35 suburbs bound the Charles river
+(f) What is the median pupil-teacher ratio among the towns in this data set?
+```{r}
+median(Boston$ptratio)
+```
+(g) Which suburb of Boston has lowest median value of owner- occupied homes? What are the values of the other predictors for that suburb, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
+```{r}
+Boston[which.min(Boston$medv),]
+par(mfrow=c(2,2))
+for (i in 1:ncol(Boston)){
+  hist(Boston[, i], main=colnames(Boston)[i])
+  abline(v=Boston[399, i], col="red", lw=5)
+}
+```
+The suburb of Boston that has lowest median value of owner-occupied homes is far away from Charles River, trafic( becuase of the low level in nitrogen oxides concentration and the distance from highway), and school (because of the low level of pupil-teacher ratio by town). The town has more people of lower status of the population and more aged population.
+
+(h) In this data set, how many of the suburbs average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the suburbs that average more than eight rooms per dwelling.
+```{r}
+#more than 7 rooms per dwelling
+summary(Boston$rm > 7)
+#more than 8 rooms per dwelling
+summary(Boston$rm > 8)
+
+idx <- Boston$rm > 8
+par(mfrow=c(2,2))
+for (i in 1:ncol(Boston)){
+  hist(Boston[, i], main=colnames(Boston)[i])
+  abline(v=Boston[idx, i], col="red", lw=2)
+}
+```
+## Derive Equation 3.4 
+
+last page
+
+## Question 3.1
+
+The null hypotheses of table 3.4 is that none of the advertising budgets of TV, radio, newspaper have an effect on sales. The corresponding p-values of TV a dn radio are highly significant, but the p-value of newspaper is not significant. Thus we reject H0 for TV and radio, but there is not significant evidence to reject H0 for nespaper. We conclude that newspaper advertising budget do not affect sales.
+
+## Question 3.3
+a)
+iii. For a fixed value of IQ and GPA, males earn more on average than females provided that the GPA is high enough.
+
+Since from the regression result, if the observant is a male then,
+$\hat{y}= 50+20*GPA +0.07*IQ +0.01*GPA \times{} IQ$.
+If the observant is a felame then, 
+$\hat{y}= 85+10*GPA +0.07*IQ +0.01*GPA \times{} IQ$. 
+
+Therefore for a fixed value of IQ and GPA, if GPA greater or equal to 3.5, then males earn more on average than females.
+
+b)
+For a female observant, $\hat{y}= 85+10*GPA +0.07*IQ +0.01*GPA \times{} IQ$
+```{r}
+IQ= 110
+GPA=4.0
+
+Yhat<- 85+10*GPA +0.07*IQ +0.01*GPA*IQ
+Yhat
+```
+
+Thus according to the model, the female most likely has a salary around $137,100
+
+c)
+False. We should look at the p-value of the regression coefficient.
+
+## Question 3.8
+(a) Use the lm() function to perform a simple linear regression with mpg as the response and horsepower as the predictor. Use the summary() function to print the results. Comment on the output. For example:
+i. Is there a relationship between the predictor and the response?
+ii. How strong is the relationship between the predictor and the response?
+iii. Is the relationship between the predictor and the response positive or negative?
+iv. What is the predicted mpg associated with a horsepower of 98? What are the associated 95 % confidence and prediction intervals?
+```{r}
+library(ISLR)
+data(Auto)
+fit <- lm(mpg ~ horsepower, data = Auto)
+summary(fit)
+```
+i. We could perform a hypothesis testing. Suppose $H_0:\beta = 0$, then the F-statistic is 599 with an associated p-value of 2.2e-16 which is small enough to reject the null hypothesis. Thus there is a clear evidence that shows the strong relationship between mpg and horsepower.
+
+ii. The Adjusted $R^{2}$ value indicates that about 60.49% of the variation in the mpg is due to the horsepower.
+
+iii. Since the coefficeint associated with horsepower is negative, the relationship between the predictor and the response is negative
+
+iv. 
+```{r}
+predict(fit, data.frame(horsepower = c(98)), interval ="confidence")
+```
+The predicted mpg associated with housepower=98 is 24.46708. The prediction interval associated with the 95% confidence is between 23.97308 and 24.96108.
+
+(b) Plot the response and the predictor. Use the abline() function to display the least squares regression line.
+
+```{r}
+plot(Auto$horsepower, Auto$mpg, main = "Scatterplot of mpg vs horsepower", xlab = "horsepower", ylab = "mpg", col = "lightblue")
+abline(fit, col = "yellow",lw=3)
+```
+(c)Use the plot() function to produce diagnostic plots of the least squares regression fit. Comment on any problems you see with the fit.
+```{r}
+par(mfrow = c(2, 2))
+plot(fit)
+```
+The plot of residuals vs fitted values indicated that there could be some non linearity for the model. The plot of residuals vs leverage indicated that there could be some outliers and a few high leverage points in the data.
+
+## Question 3.15
+
+(a) For each predictor, fit a simple linear regression model to predict the response. Describe your results. In which of the models is there a statistically significant association between the predictor and the response? Create some plots to back up your assertions.
+```{r}
+mod = list()
+for (i in 2:ncol(Boston)){
+  mod[[i]]=lm(Boston[,1]~Boston[,i])
+  print(summary(mod[[i]]))
+}
+#plot the result
+par(mfrow = c(2, 2))
+plot(crim ~ .-crim, data = Boston)
+```
+All predictors have a relatively small p-value except for “chas”, which represent Charles River dummy. We cany conclude that there is enough evidence to show that there are statistically significant association between each predictor and the response variable except for the "chas" variable.
+
+(b) Fit a multiple regression model to predict the response using all of the predictors. Describe your results. For which predictors can we reject the null hypothesis H0 : $\beta$j = 0?
+```{r}
+mod_multi<- lm(crim ~ . - crim, data = Boston)
+summary(mod_multi)
+```
+The p-value associated with "dis" and "rad" is less than 0.001 which are very small. The p-value associated with medv is 0.001087 which is also relatively small. Thus there is enough evidence to reject the null hypothesis for these three variables. For other variables, we fail to reject the null hypothesis. Compared to the single regression model, R-squared is higher when using a multiple regression model.
+
+(c) How do your results from (a) compare to your results from (b)? Create a plot displaying the univariate regression coefficients from (a) on the x-axis, and the multiple regression coefficients from (b) on the y-axis. That is, each predictor is displayed as a single point in the plot. Its coefficient in a simple linear regres- sion model is shown on the x-axis, and its coefficient estimate in the multiple linear regression model is shown on the y-axis.
+```{r}
+univ<- vector()
+for (i in 2:ncol(Boston)){
+  univ[i]<-mod[[i]]$coefficients[2]
+}
+names(univ)<- colnames(Boston)
+
+#regression coefficients from (a)
+univ<- univ[-1]
+#regression coefficients from (b)
+multi<- mod_multi$coefficients[2:14]
+
+plot(univ,multi,main = "Univariate vs. Multiple Regression Coefficients", 
+    xlab = "Univariate", ylab = "Multiple")
+```
+(d) Is there evidence of non-linear association between any of the predictors and the response? To answer this question, for each predictor X, fit a model of the form
+```{r}
+mod2 = list()
+for (i in 2:ncol(Boston)){
+  mod2[[i]]=lm(Boston[,1]~Boston[,i]+I(Boston[,i]^2)+I(Boston[,i]^3))
+  print(summary(mod2[[i]]))
+}
+```
+
+```{r}
+#model for "chas"
+mod2[[4]]
+#model for "age"
+mod2[[7]]
+```
+For variables "indus", "nox", "dis", "ptracio", and "medv", there is evidence of a non-linear relationship, as each of these variables squared and cubed terms is found to be statistically signficant. For the "chas" variable we get NA values for the squared and cubed term, since it's a dummy variable which only contains 0s and 1s. These values will not change if they are squared or cubed. The linear term of variable "age" becomes statistically insignficant compared with the squared and cubed term. For other variables, there is no obvious non-linear relationship between the predictor and outcome variables.

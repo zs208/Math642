@@ -1,0 +1,229 @@
+---
+title: "Math642_HW6_FyonaSun"
+author: "Fyona Sun"
+date: "2/24/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 4.1
+Using a little bit of algebra, prove that (4.2) is equivalent to (4.3). In other words, the logistic function representation and logit representation for the logistic regression model are equivalent.
+
+
+$$\begin{align}
+p(X) = \frac{e^{\beta_0+\beta_1X}}{1+e^{\beta_0+\beta_1X}}\\
+1-p(X) =  \frac{1+e^{\beta_0+\beta_1X}-e^{\beta_0+\beta_1X}}{1+e^{\beta_0+\beta_1X}} = \frac{1}{e^{\beta_0+\beta_1X}}\\
+p(X) = e^{\beta_0+\beta_1X} (\frac{1}{e^{\beta_0+\beta_1X}})=e^{\beta_0+\beta_1X} (1-p(X))\\
+\frac{p(X)}{1-p(X)}=e^{\beta_0+\beta_1X}
+\end{align}$$
+## 4.6
+
+Suppose we collect data for a group of students in a statistics class with variables X1 = hours studied, X2 = undergrad GPA, and Y = receive an A. We fit a logistic regression and produce estimated coefficient, $\hat \beta_0 = -6$, $\hat \beta_1 = 0/05$, $\hat \beta_2 = 1$
+
+(a) Estimate the probability that a student who studies for 40 h and has an undergrad GPA of 3.5 gets an A in the class.
+
+$$\hat p(X) = \frac{e^{-6+0.05X_1+X_2}}{1+e^{-6+0.05X_1+X_2}}=0.3775407$$
+```{r}
+exp(-6+0.05*40+3.5)/(1+exp(-6+0.05*40+3.5))
+```
+(b) How many hours would the student in part (a) need to study to have a 50 % chance of getting an A in the class?
+$$\hat p(X) = \frac{e^{-6+0.05X_1+X_2}}{1+e^{-6+0.05X_1+X_2}}=0.5$$ give X2=3.5, solve for X1
+
+$$e^{-6+0.05X_1+3.6}=1\\
+X1 = \frac{log(1)+6-3.5}{0.05}=50$$
+```{r}
+(log(1)+6-3.5)/0.05
+```
+
+## 4.9
+
+This problem has to do with odds.
+(a) On average, what fraction of people with an odds of 0.37 of defaulting on their credit card payment will in fact default?
+$$\frac{p(X)}{1-P(x)}=0.37 \\
+p(X) = \frac{0.37}{1+0.37}=0.27$$
+Thus on average there are 27% of people defaulting on their creditt card payment.
+
+(b) Suppose that an individual has a 16% chance of defaulting on her credit card payment. What are the odds that she will default?
+
+$$\frac{p(X)}{1-P(x)}=\frac{0.16}{1-0.16}=0.19$$
+The odds that she will default is 19%.
+
+## 4.10
+This question should be answered using the Weekly data set, which is part of the ISLR package. This data is similar in nature to the Smarket data from this chapter’s lab, except that it contains 1,089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+
+(a) Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
+```{r}
+library(ISLR)
+attach(Weekly)
+summary(Weekly)
+plot(Today~Lag1, data=Weekly)
+simplelm = lm(Today~Lag1, data=Weekly)
+abline(simplelm, lwd= 3, col= "red")
+
+pairs(Weekly)
+```
+(b) Use the full data set to perform a logistic regression with Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+```{r}
+fit<- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, data = Weekly, family = binomial)
+summary(fit)
+```
+The variable lag2 has a p-value of 0.0296 < 0.05 which is statistically significant.
+
+(c) Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
+```{r}
+probs<- predict(fit, type='response')
+pred<- rep('Down',length(probs))
+pred[probs>0.5] <- 'Up'
+table(pred, Direction)
+```
+```{r}
+  cm<- table(pred, Direction)
+  TP<-cm[2,2]
+  TN<-cm[1,1]
+  FP<-cm[2,1]
+  FN<-cm[1,2]
+  N<-sum(cm)
+  acc<-(TP+TN)/N
+  sens<-TP/(TP+FN)
+  prec<-TP/(TP+FP)
+  FPR<-FP/(FP+TN)
+  spec<-1-FPR
+  
+  acc
+  sens
+  prec
+  FPR
+  spec
+```
+The accuracy rate is 56.10652%. The true positive rate is 92.06612% which also known as the sensiticity. The false positive rate is 88.84298%, which equals to 1-specificity.
+
+(d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+```{r}
+train.data = Weekly[Weekly$Year<2009,]
+test.data = Weekly[Weekly$Year>2008,]
+fit2 = glm(Direction~Lag2, data= train.data, family = "binomial")
+summary(fit2)
+probs = predict(fit2, type="response", newdata = test.data)
+testdirs = Weekly$Direction[Weekly$Year>2008]
+pred<- rep('Down',length(probs))
+pred[probs>0.5] <- 'Up'
+table(pred, test.data$Direction)
+#the overall fraction of correct predictions for the held out data
+mean(pred==test.data$Direction)
+```
+The accuracy is 62.5%
+(e) Repeat (d) using LDA.
+```{r}
+require(MASS)
+
+fit.lda <- lda(Direction ~ Lag2, data = train.data)
+
+pred <- predict(fit.lda, newdata = test.data)
+pred_values <- pred$class
+table(pred_values, test.data$Direction)
+acc <- paste('Accuracy:', mean(pred_values == test.data$Direction))
+acc
+```
+
+The LDA model also gives 62.5%
+(f) Repeat (d) using QDA.
+```{r}
+fit.qda <- qda(Direction ~ Lag2, data = train.data)
+
+pred <- predict(fit.qda, newdata = test.data)
+pred_values <- pred$class
+table(pred_values, test.data$Direction)
+acc <- paste('Accuracy:', mean(pred_values == test.data$Direction))
+acc
+```
+The QDA model does not do as well as the LDA model. The accuracy of this model is 58.65%.
+(g) Repeat (d) using KNN with K = 1.
+```{r}
+require(class)
+knn_pred <- knn(train = data.frame(train.data$Lag2), 
+                test = data.frame(test.data$Lag2), 
+                cl = train.data$Direction, k = 1)
+
+acc <- paste('Accuracy:', mean(knn_pred == test.data$Direction))
+acc
+```
+The KNN model with k=1 gives a model with accuracy = 0.5
+
+(h) Which of these methods appears to provide the best results on
+this data?
+The LDA model with Lag2 seems to provide the best result.
+
+(i) Experiment with different combinations of predictors, including possible transformations and interactions, for each of the methods. Report the variables, method, and associated confu- sion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+```{r}
+library(dplyr)
+library(ggplot2)
+acc <- list('1' = 0.5)
+for (i in 1:20) {
+    knn_pred <- knn(train = data.frame(train.data$Lag2), test = data.frame(test.data$Lag2), cl = train.data$Direction, k = i)
+    acc[as.character(i)] = mean(knn_pred == test.data$Direction)
+}
+
+acc <- unlist(acc)
+data.frame(acc = acc)%>%
+    mutate(k = row_number())%>%
+    ggplot(aes(k, acc)) +
+    geom_col(aes(fill = k == which.max(acc))) +
+    labs(x = 'K', y = 'Accuracy', title = 'KNN Accuracy for different values of K') +
+    scale_x_continuous(breaks = 1:20) +
+    coord_cartesian(ylim = c(min(acc), max(acc))) +
+    guides(fill = FALSE)
+```
+## 4.12
+
+This problem involves writing functions.
+(a) Write a function, Power(), that prints out the result of raising 2 to the 3rd power. In other words, your function should compute 2^3 and print out the results.
+
+Hint: Recall that x^a raises x to the power a. Use the print() function to output the result.
+
+```{r}
+Power <- function() {
+    print(2^3)
+}
+Power()
+```
+(b) Create a new function, Power2(), that allows you to pass any two numbers, x and a, and prints out the value of x^a. You can do this by beginning your function with the line
+```{r}
+Power2 <- function(x, a) {
+    print(x^a)
+}
+Power2(3, 8)
+```
+(c) Using the Power2() function that you just wrote, compute
+```{r}
+Power2(10,3)
+Power2(8,17)
+Power2(131,3)
+
+```
+(d) Now create a new function, Power3(), that actually returns the result x^a as an R object, rather than simply printing it to the screen. That is, if you store the value x^a in an object called result within your function, then you can simply return() this result, using the following line:
+The line above should be the last line in your function, before the } symbol.
+```{r}
+Power3 <- function(x , a) {
+    result <- x^a
+    return(result)
+}
+```
+(e) Now using the Power3() function, create a plot of f(x) = x .
+```{r}
+x <- 1:10
+plot(x, Power3(x, 2),log = "xy", xlab = "Log of x", ylab = "Log of x^2", main = "Log of x^2 vs Log of x")
+```
+
+(f) Create a function, PlotPower(), that allows you to create a plot of x against x^a for a fixed a and for a range of values of x. For instance, if you call
+```{r}
+PlotPower <- function(x, a) {
+    plot(x, Power3(x, a), xlab = "Log of x", ylab = paste("Log of x",'^',a))
+}
+
+PlotPower(1:10, 3)
+```

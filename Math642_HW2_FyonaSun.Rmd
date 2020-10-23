@@ -1,0 +1,171 @@
+---
+title: "Math642_HW2_FyonaSun"
+author: "Fyona Sun"
+date: "1/22/2020"
+output: pdf_document
+---
+
+##Lab1
+```{r}
+data("USArrests")
+names(USArrests)
+apply(USArrests,2,mean)
+apply(USArrests,2,var)
+model1=prcomp(USArrests,scale=TRUE)
+#orthogonal unit vectors
+model1$rotation
+biplot(model1,scale=0)
+
+model1$sdev
+var=model1$sdev^2
+pve=var/sum(var)
+plot(pve,type='b')
+plot(cumsum(var))
+```
+
+##Lab2
+```{r}
+set.seed(2)
+x=matrix(rnorm(50*2),ncol=2)
+x[1:25,1]=x[1:25,1]+3
+x[1:25,2]=x[1:25,2]-4
+plot(x)
+kmodel=kmeans(x,2,nstart = 20)
+kmodel$cluster
+plot(x, col=(kmodel$cluster +1), main="K-Means Clustering Results with K=2", xlab="", ylab="", pch=20, cex=2)
+```
+
+##Lab3
+```{r}
+hcmodel1=hclust(dist(x),method = 'complete')
+hcmodel2=hclust(dist(x),method = 'average')
+hcmodel3=hclust(dist(x),method = 'single')
+```
+##Question 10.2
+
+(a) On the basis of this dissimilarity matrix, sketch the dendrogram that results from hierarchically clustering these four observations using complete linkage. Be sure to indicate on the plot the height at which each fusion occurs, as well as the observations corresponding to each leaf in the dendrogram.
+
+```{r}
+d.matrix = as.dist(matrix(c(0, 0.3, 0.4, 0.7, 
+                     0.3, 0, 0.5, 0.8,
+                     0.4, 0.5, 0.0, 0.45,
+                     0.7, 0.8, 0.45, 0.0), nrow = 4))
+plot(hclust(d.matrix, method = "complete"))
+```
+(b) Repeat (a), this time using single linkage clustering.
+```{r}
+plot(hclust(d.matrix, method = "single"))
+```
+(c) Suppose that we cut the dendogram obtained in (a) such that two clusters result. Which observations are in each cluster?
+
+The first cluster contains 1 and 2, and the second cluster contains 3 and 4.
+
+(d) Suppose that we cut the dendogram obtained in (b) such that two clusters result. Which observations are in each cluster?
+
+The first cluster contains 4 and the second cluster contains 3 and (1,2).
+
+(e) It is mentioned in the chapter that at each fusion in the dendrogram, the position of the two clusters being fused can be swapped without changing the meaning of the dendrogram. Draw a dendrogram that is equivalent to the dendrogram in (a), for which two or more of the leaves are repositioned, but for which the meaning of the dendrogram is the same.
+```{r}
+plot(hclust(d.matrix, method = "complete"), labels = c(2,1,4,3))
+```
+##Question 10.3
+
+(a) Plot the observations.
+
+```{r}
+x <- cbind(c(1, 1, 0, 5, 6, 4), c(4, 3, 4, 1, 2, 0))
+plot(x[,1], x[,2], xlab = 'X1', ylab='X2')
+```
+
+(b) Randomly assign a cluster label to each observation. You can use the sample() command in R to do this. Report the cluster labels for each observation.
+```{r}
+set.seed(1)
+labels <- sample(2, nrow(x), replace = T)
+labels
+plot(x[, 1], x[, 2], col = (labels + 1), pch = 20, cex = 2)
+```
+(c) Compute the centroid for each cluster.
+```{r}
+cbind(x,labels)
+centroid1 <- c(mean(x[labels == 1, 1]), mean(x[labels == 1, 2]))
+centroid2 <- c(mean(x[labels == 2, 1]), mean(x[labels == 2, 2]))
+plot(x[,1], x[,2], col=(labels + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+```
+$x_{11} = 1/3*(1+1+6) = 8/3$ and $x_{12} = 1/3*(2+3+4) = 3$
+$x_{21} = 1/3*(0+4+5) = 11/4$ and $x_{22} = 1/3*(0+1+4) = 5/3$
+
+(d) Assign each observation to the centroid to which it is closest, in terms of Euclidean distance. Report the cluster labels for each observation.
+```{r}
+labels <- c(1, 1, 1, 2, 2, 2)
+plot(x[, 1], x[, 2], col = (labels + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+```
+(e) Repeat (c) and (d) until the answers obtained stop changing.
+```{r}
+centroid1 <- c(mean(x[labels == 1, 1]), mean(x[labels == 1, 2]))
+centroid2 <- c(mean(x[labels == 2, 1]), mean(x[labels == 2, 2]))
+plot(x[,1], x[,2], col=(labels + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+labels <- c(1, 1, 1, 2, 2, 2)
+plot(x[, 1], x[, 2], col = (labels + 1), pch = 20, cex = 2)
+points(centroid1[1], centroid1[2], col = 2, pch = 4)
+points(centroid2[1], centroid2[2], col = 3, pch = 4)
+```
+$x_{11} = 1/3*(0+1+1) = 2/3$ and $x_{12} = 1/3*(3+4+4) = 11/3$
+$x_{21} = 1/3*(4+5+6) = 5$ and $x_{22} = 1/3*(0+1+2) = 1$
+(f) In your plot from (a), color the observations according to the cluster labels obtained.
+```{r}
+plot(x[, 1], x[, 2], col=(labels + 1), pch = 20, cex = 2)
+```
+
+##Question 10.8
+(a) Using the sdev output of the prcomp() function, as was done in Section 10.2.3.
+```{r}
+data("USArrests")
+model1=prcomp(USArrests,scale=TRUE)
+model1$sdev
+var=model1$sdev^2
+pve=var/sum(var)
+print(pve)
+plot(pve,type='b', main='PVE')
+plot(cumsum(pve),type ='b', main='Accumulated PVE')
+```
+
+(b) By applying Equation 10.8 directly. That is, use the prcomp() function to compute the principal component loadings. Then, use those loadings in Equation 10.8 to obtain the PVE.
+
+```{r}
+pca<- model1$rotation
+sumvar<- sum(apply(as.matrix(scale(USArrests))^2,2,sum))
+pve2<- apply((as.matrix(scale(USArrests)) %*% pca)^2, 2, sum) / sumvar
+print(pve2)
+plot(cumsum(pve2),type ='b', main='Accumulated PVE')
+```
+
+##Question 10.9
+(a) Using hierarchical clustering with complete linkage and Euclidean distance, cluster the states.
+```{r}
+hcmodel.complete <- hclust(dist(USArrests), method = "complete")
+plot(hcmodel.complete)
+```
+(b) Cut the dendrogram at a height that results in three distinct clusters. Which states belong to which clusters?
+```{r}
+cutree(hcmodel.complete, 3)
+```
+(c) Hierarchically cluster the states using complete linkage and Euclidean distance, after scaling the variables to have standard deviation one.
+```{r}
+USArrests.scaled<- dist(scale(USArrests))
+hcmodel.complete.scaled <- hclust(USArrests.scaled, method = "complete")
+plot(hcmodel.complete.scaled)
+```
+(d) What effect does scaling the variables have on the hierarchical clustering obtained? In your opinion, should the variables be scaled before the inter-observation dissimilarities are computed? Provide a justification for your answer.
+```{r}
+cutree(hcmodel.complete.scaled, 3)
+cross.table<- table(cutree(hcmodel.complete, 3), cutree(hcmodel.complete.scaled, 3))
+cross.table
+```
+
+Compare the result of hcmodel.complete and hcmodel.complete.scaled, there are 28/50 states are classified into the same category. There is no state that classified into category 1 or 2 by the scaled model that have been classified into category 3 by the non-scaled model. Scaling impacts the branch lengths, and the height of the tree. The height of the un-scaled model is 293.622751 while the height of the scaled tree is 6.0766416. In this case , scaling is more appropriate because the variables all have different unites. Therefore, it is imporant to scale the data before clustering.

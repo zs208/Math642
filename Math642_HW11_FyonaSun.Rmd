@@ -1,0 +1,79 @@
+---
+title: "Math642_HW11_FyonaSun"
+author: "Fyona Sun"
+date: "4/22/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1.
+```{r}
+source("DBDA2E-utilities.R")  # Load definitions of graphics functions etc.
+source("BernBeta.R") 
+
+# Specify the prior:
+t = 0.75             # Specify the prior MODE.
+n = 25               # Specify the effective prior sample size.
+a = t*(n-2) + 1      # Convert to beta shape parameter a.
+b = (1-t)*(n-2) + 1  # Convert to beta shape parameter b.
+
+Prior = c(a,b)       # Specify Prior as vector with the two shape parameters.
+
+# Specify the data:
+N = 25                         # The total number of flips.
+z = 1                         # The number of heads.
+Data = c(rep(0,N-z),rep(1,z))  # Convert N and z into vector of 0's and 1's.
+# 
+# openGraph(width=5,height=7)
+# posterior = BernBeta( priorBetaAB=Prior, Data=Data , plotType="Bars" , 
+#                       showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+# saveGraph(file="BernBetaExample",type="png")
+```
+a) What are the inputs and outputs for BernBeta?  Explain what they mean
+.
+Input of BernBeta is prior of a beta distribution and new observations.
+priorBetaAB is two-element vector of beta distribution B(a,b).
+Data is vector of 0's and 1's. z is the number of observed heads from the data and N is the total number of trials from the data.
+
+The output is a two-element vector that gives posterior beta parameters
+  
+b) Start with a prior of beta(4,4).  Use the BernBeta function to flip the coin once and get a head.  What is the posterior?  Show all plots and explain results.
+
+```{r}
+BernBeta(priorBetaAB = c(4, 4), Data = c(1), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+```
+The posterior is B(5,4). The observed head shifts the prior disstribution slightly to the right. The Posterior is a compromise between our prior beliefs and a single data point observed.
+
+c) Use the posterior from the previous flip as the prior for the next flip.  (You can use the result from the last run - “post” - instead of c(5,4) as the input the BernBeta.) Flip the coin again and get a head again.  What is the new posterior?
+```{r}
+BernBeta(priorBetaAB = c(5, 4), Data = c(1), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+```
+
+The new posterior is B(6,4).
+
+d) Using the posterior from the last flip, flip again and get tails.  What is the new posterior?
+
+```{r}
+BernBeta(priorBetaAB = c(6, 4), Data = c(0), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+```
+The new posterior is B(6,5).
+
+
+e) Start over at b) and do three flips, but in the order T, H, H.  Show the posterior after these 3 flips. How does the posterior change?  Does order of the results matter?
+```{r}
+BernBeta(priorBetaAB = c(4, 4), Data = c(0,1,1), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+
+BernBeta(priorBetaAB = c(4, 4), Data = c(1,0,1), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+
+BernBeta(priorBetaAB = c(4, 4), Data = c(1,1,0), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+```
+We get the same final posterior form as before regardless of ordering of the 3 coin tosses. The posterior distribution is B(6,5)
+
+f) Start over at b) and do three flips, but in the order T, T, H.  Show the posterior after these 3 flips. How does the posterior change?
+```{r}
+BernBeta(priorBetaAB = c(4, 4), Data = c(0,0,1), plotType="Bars", showCentTend="Mode" , showHDI=TRUE , showpD=FALSE )
+```
+The posterior distribution is B(5,6)

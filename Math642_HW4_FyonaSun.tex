@@ -1,0 +1,817 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Math642\_HW4\_FyonaSun},
+            pdfauthor={Fyona Sun},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Math642\_HW4\_FyonaSun}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Fyona Sun}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{2/5/2020}
+
+
+\begin{document}
+\maketitle
+
+\subsection{6.1}\label{section}
+
+We perform best subset, forward stepwise, and backward stepwise
+selection on a single data set. For each approach, we obtain p + 1
+models, containing 0, 1, 2, . . . , p predictors. Explain your answers:
+\#\#\#(a) Which of the three models with k predictors has the smallest
+training RSS? The model with k predictors with the smallest training RSS
+can be obtained from the best subset selection. Since when applying the
+best subset select, the model with k predictors is the model with the
+smallest RSS among all the \(C_p^k\) models. On the other hand with the
+forward stepwise selection or the backward stepwise selection, the model
+with k predictors start with the best k-1 model and chosing the best k
+given a fixed k-1 (forward) or in reverse start at the best k+1 and
+chosing the best single feature to remove resulting in the best model.
+
+\subsubsection{(b) Which of the three models with k predictors has the
+smallest test
+RSS?}\label{b-which-of-the-three-models-with-k-predictors-has-the-smallest-test-rss}
+
+The training error can be a poor estimate of the test error. In order to
+select the best model with respect to test error, we need to estimate
+this test error by either calculating and comparing the \(C_p\), AIC,
+BIC, and adjusted \(R^2\) or performing a cross-validation. \#\#\#(c)
+True or False: i. The predictors in the k-variable model identified by
+forward stepwise are a subset of the predictors in the (k+1)-variable
+model identified by forward stepwise selection. True. In the forward
+stepwise selection, the model with k+1 predictors is obtained by
+augmenting the predictors in the model with k predictors with one
+additional feature.
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  The predictors in the k-variable model identified by back- ward
+  stepwise are a subset of the predictors in the (k + 1)- variable model
+  identified by backward stepwise selection.
+\end{enumerate}
+
+True. The k variable model contains all but one feature in the k+1 best
+model, minus the single feature resulting in the smallest gain in RSS.
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  The predictors in the k-variable model identified by back- ward
+  stepwise are a subset of the predictors in the (k + 1)- variable model
+  identified by forward stepwise selection.
+\end{enumerate}
+
+False. There is no direct linkage between forward stepwise selection and
+backward stepwise selection. They could be disjoint sets.
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  The predictors in the k-variable model identified by forward stepwise
+  are a subset of the predictors in the (k+1)-variable model identified
+  by backward stepwise selection.
+\end{enumerate}
+
+False. There is no direct linkage between forward stepwise selection and
+backward stepwise selection. They could be disjoint sets.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{21}
+\tightlist
+\item
+  The predictors in the k-variable model identified by best subset are a
+  subset of the predictors in the (k + 1)-variable model identified by
+  best subset selection.
+\end{enumerate}
+
+False. The model with k+1 variable is obtained by selecting among all
+possible models with k+1 variables. It does not necessarily contain all
+the predictors selected for the k-variable model.
+
+\subsection{6.2}\label{section-1}
+
+For parts (a) through (c), indicate which of i. through iv. is correct.
+Justify your answer. (a) The lasso, relative to least squares, is: i.
+More flexible and hence will give improved prediction accuracy when its
+increase in bias is less than its decrease in variance. ii. More
+flexible and hence will give improved prediction accuracy when its
+increase in variance is less than its decrease in bias. iii. Less
+flexible and hence will give improved prediction accuracy when its
+increase in bias is less than its decrease in variance. iv. Less
+flexible and hence will give improved prediction accuracy when its
+increase in variance is less than its decrease in bias.
+
+The statement iii is true. The LASSO is a more restrictive model, so it
+could reduce overfitting and variance in predictions.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\item
+  Repeat (a) for ridge regression relative to least squares. The
+  statement iii is true. The ridge regression is also a more restrictive
+  model, so it could reduce overfitting and variance in predictions.
+\item
+  Repeat (a) for non-linear methods relative to least squares. The
+  statement ii is true. Non-linear methods are more flexible and will
+  give improved prediction accuracy when their increase in variance are
+  less than their decrease in bias.
+\end{enumerate}
+
+\subsection{6.3}\label{section-2}
+
+Suppose we estimate the regression coefficients in a linear regression
+model by minimizing
+\(\sum_{i=1}^n(y_i-\beta_0-\sum_{j=1}^p\beta_jx_{ij})^2\) subject to
+\(\sum_{j=1}^p|\beta_j|\le s\)for a particular value of s.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  As we increase s from 0, the training RSS will:
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\roman{enumi}.}
+\tightlist
+\item
+  Increase initially, and then eventually start decreasing in an
+  inverted U shape.
+\item
+  Decrease initially, and then eventually start increasing in a U shape.
+\item
+  Steadily increase.
+\item
+  Steadily decrease.
+\item
+  Remain constant. The statement iv is true. As s increases, the l1
+  penalty increases, creating less restriction. When s is sufficiently
+  large, it will shrink the RSS until it eventually yields the least
+  squares solution.
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Repeat (a) for test RSS. (c) Repeat (a) for variance.
+\end{enumerate}
+
+For the test RSS the statement ii is true. Initially as \(\beta\) are
+forced to 0, the test RSS will improve as the model has less
+overfitting. However eventually necessary coefficients will be removed
+from the model, and the test RSS will then increase, making a U shape.
+For variance, the statement iii is true. The variance will increase as
+more penalty is placed on the model.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{3}
+\item
+  Repeat (a) for (squared) bias. The statement iv is true. As we
+  increase s from 0, we are restricting the \(\beta_j\) more and more,
+  and so the model is becoming less and less flexible which provokes a
+  steady increase in bias.
+\item
+  Repeat (a) for the irreducible error. The statement v is true. The
+  irreducible error would remain the same.
+\end{enumerate}
+
+\subsection{6.8}\label{section-3}
+
+In this exercise, we will generate simulated data, and will then use
+this data to perform best subset selection.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  Use the rnorm() function to generate a predictor X of length n = 100,
+  as well as a noise vector \(\epsilon\) of length n = 100.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{x <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{eps <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Generate a response vector Y of length n = 100 according to the model
+  \(Y=\beta_0 +\beta_1X+\beta_2X^2+\beta_3X^3+\epsilon\)
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b0 <-}\StringTok{ }\DecValTok{2}
+\NormalTok{b1 <-}\StringTok{ }\DecValTok{3}
+\NormalTok{b2 <-}\StringTok{ }\NormalTok{-}\DecValTok{1}
+\NormalTok{b3 <-}\StringTok{ }\NormalTok{-}\DecValTok{2}
+\NormalTok{y <-}\StringTok{ }\NormalTok{b0 +}\StringTok{ }\NormalTok{b1 *}\StringTok{ }\NormalTok{x +}\StringTok{ }\NormalTok{b2 *}\StringTok{ }\NormalTok{x^}\DecValTok{2} \NormalTok{+}\StringTok{ }\NormalTok{b3 *}\StringTok{ }\NormalTok{x^}\DecValTok{3} \NormalTok{+}\StringTok{ }\NormalTok{eps}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Use the regsubsets() function to perform best subset selection in
+  order to choose the best model containing the predictors
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(leaps)}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching packages ---------------------------------- tidyverse 1.2.1 --
+\end{verbatim}
+
+\begin{verbatim}
+## √ ggplot2 3.2.1     √ purrr   0.3.2
+## √ tibble  1.4.2     √ dplyr   0.7.8
+## √ tidyr   0.8.2     √ stringr 1.4.0
+## √ readr   1.3.1     √ forcats 0.3.0
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'ggplot2' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'purrr' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'stringr' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts ------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{y =} \NormalTok{y, }\DataTypeTok{x =} \NormalTok{x)}
+\NormalTok{fit <-}\StringTok{ }\KeywordTok{regsubsets}\NormalTok{(y ~}\StringTok{ }\NormalTok{x +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{2}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{3}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{4}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{5}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{6}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{7}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{8}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{9}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{10}\NormalTok{), }\DataTypeTok{data =} \NormalTok{data, }\DataTypeTok{nvmax =} \DecValTok{10}\NormalTok{)}
+
+\NormalTok{fit.summary <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(fit)}
+
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$cp, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Cp"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{cp.min=}\KeywordTok{min}\NormalTok{(fit.summary$cp)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$cp==cp.min], cp.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$bic, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"BIC"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{bic.min=}\KeywordTok{min}\NormalTok{(fit.summary$bic)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$bic==bic.min], bic.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$adjr2,}\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Adjusted R Square"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{adjr2.max=}\KeywordTok{max}\NormalTok{(fit.summary$adjr2)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$adjr2==adjr2.max], adjr2.max, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW4_FyonaSun_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+The best model selected by \(C_p\) contains 4 predictors,
+\(X, X^2, X^3 and X^6\). The best model selected by BIC contains 3
+predictors, \(X, X^2, X^3\). The best model selected by adjusted \(R^2\)
+contains 4 predictors, \(X, X^2, X^3 and X^6\)
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Repeat (c), using forward stepwise selection and also using back-
+  wards stepwise selection. How does your answer compare to the results
+  in (c)?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{##forward stepwise}
+\NormalTok{fit.frd <-}\StringTok{ }\KeywordTok{regsubsets}\NormalTok{(y ~}\StringTok{ }\NormalTok{x +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{2}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{3}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{4}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{5}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{6}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{7}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{8}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{9}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{10}\NormalTok{), }\DataTypeTok{data =} \NormalTok{data, }\DataTypeTok{nvmax =} \DecValTok{19}\NormalTok{, }\DataTypeTok{method=}\StringTok{"forward"}\NormalTok{)}
+\NormalTok{fit.summary <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(fit.frd)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$cp, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Cp"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{cp.min=}\KeywordTok{min}\NormalTok{(fit.summary$cp)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$cp==cp.min], cp.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$bic, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"BIC"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{bic.min=}\KeywordTok{min}\NormalTok{(fit.summary$bic)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$bic==bic.min], bic.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$adjr2,}\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Adjusted R Square"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{adjr2.max=}\KeywordTok{max}\NormalTok{(fit.summary$adjr2)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$adjr2==adjr2.max], adjr2.max, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW4_FyonaSun_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit.summary}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Subset selection object
+## Call: regsubsets.formula(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + 
+##     I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), data = data, 
+##     nvmax = 19, method = "forward")
+## 10 Variables  (and intercept)
+##         Forced in Forced out
+## x           FALSE      FALSE
+## I(x^2)      FALSE      FALSE
+## I(x^3)      FALSE      FALSE
+## I(x^4)      FALSE      FALSE
+## I(x^5)      FALSE      FALSE
+## I(x^6)      FALSE      FALSE
+## I(x^7)      FALSE      FALSE
+## I(x^8)      FALSE      FALSE
+## I(x^9)      FALSE      FALSE
+## I(x^10)     FALSE      FALSE
+## 1 subsets of each size up to 10
+## Selection Algorithm: forward
+##           x   I(x^2) I(x^3) I(x^4) I(x^5) I(x^6) I(x^7) I(x^8) I(x^9)
+## 1  ( 1 )  " " " "    " "    " "    "*"    " "    " "    " "    " "   
+## 2  ( 1 )  " " "*"    " "    " "    "*"    " "    " "    " "    " "   
+## 3  ( 1 )  "*" "*"    " "    " "    "*"    " "    " "    " "    " "   
+## 4  ( 1 )  "*" "*"    "*"    " "    "*"    " "    " "    " "    " "   
+## 5  ( 1 )  "*" "*"    "*"    " "    "*"    "*"    " "    " "    " "   
+## 6  ( 1 )  "*" "*"    "*"    " "    "*"    "*"    " "    " "    "*"   
+## 7  ( 1 )  "*" "*"    "*"    " "    "*"    "*"    "*"    " "    "*"   
+## 8  ( 1 )  "*" "*"    "*"    " "    "*"    "*"    "*"    "*"    "*"   
+## 9  ( 1 )  "*" "*"    "*"    " "    "*"    "*"    "*"    "*"    "*"   
+## 10  ( 1 ) "*" "*"    "*"    "*"    "*"    "*"    "*"    "*"    "*"   
+##           I(x^10)
+## 1  ( 1 )  " "    
+## 2  ( 1 )  " "    
+## 3  ( 1 )  " "    
+## 4  ( 1 )  " "    
+## 5  ( 1 )  " "    
+## 6  ( 1 )  " "    
+## 7  ( 1 )  " "    
+## 8  ( 1 )  " "    
+## 9  ( 1 )  "*"    
+## 10  ( 1 ) "*"
+\end{verbatim}
+
+The best model selected by \(C_p\) contains 4 predictors,
+\(X, X^2, X^3 and X^5\). The best model selected by BIC contains 4
+predictors, \(X, X^2, X^3 and X^5\). The best model selected by adjusted
+\(R^2\) contains 4 predictors, \(X, X^2, X^3 and X^5\)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{##backward stepwise}
+\NormalTok{fit.bwd <-}\StringTok{ }\KeywordTok{regsubsets}\NormalTok{(y ~}\StringTok{ }\NormalTok{x +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{2}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{3}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{4}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{5}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{6}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{7}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{8}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{9}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{10}\NormalTok{), }\DataTypeTok{data =} \NormalTok{data, }\DataTypeTok{nvmax =} \DecValTok{19}\NormalTok{, }\DataTypeTok{method=}\StringTok{"backward"}\NormalTok{)}
+\NormalTok{fit.summary <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(fit.bwd)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$cp, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Cp"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{cp.min=}\KeywordTok{min}\NormalTok{(fit.summary$cp)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$cp==cp.min], cp.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$bic, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"BIC"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{bic.min=}\KeywordTok{min}\NormalTok{(fit.summary$bic)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$bic==bic.min], bic.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$adjr2,}\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Adjusted R Square"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{adjr2.max=}\KeywordTok{max}\NormalTok{(fit.summary$adjr2)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$adjr2==adjr2.max], adjr2.max, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW4_FyonaSun_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit.summary}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Subset selection object
+## Call: regsubsets.formula(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + 
+##     I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), data = data, 
+##     nvmax = 19, method = "backward")
+## 10 Variables  (and intercept)
+##         Forced in Forced out
+## x           FALSE      FALSE
+## I(x^2)      FALSE      FALSE
+## I(x^3)      FALSE      FALSE
+## I(x^4)      FALSE      FALSE
+## I(x^5)      FALSE      FALSE
+## I(x^6)      FALSE      FALSE
+## I(x^7)      FALSE      FALSE
+## I(x^8)      FALSE      FALSE
+## I(x^9)      FALSE      FALSE
+## I(x^10)     FALSE      FALSE
+## 1 subsets of each size up to 10
+## Selection Algorithm: backward
+##           x   I(x^2) I(x^3) I(x^4) I(x^5) I(x^6) I(x^7) I(x^8) I(x^9)
+## 1  ( 1 )  " " " "    "*"    " "    " "    " "    " "    " "    " "   
+## 2  ( 1 )  "*" " "    "*"    " "    " "    " "    " "    " "    " "   
+## 3  ( 1 )  "*" "*"    "*"    " "    " "    " "    " "    " "    " "   
+## 4  ( 1 )  "*" "*"    "*"    " "    " "    " "    " "    " "    "*"   
+## 5  ( 1 )  "*" "*"    "*"    " "    " "    " "    " "    "*"    "*"   
+## 6  ( 1 )  "*" "*"    "*"    " "    " "    " "    " "    "*"    "*"   
+## 7  ( 1 )  "*" "*"    "*"    " "    " "    "*"    " "    "*"    "*"   
+## 8  ( 1 )  "*" "*"    "*"    "*"    " "    "*"    " "    "*"    "*"   
+## 9  ( 1 )  "*" "*"    "*"    "*"    "*"    "*"    " "    "*"    "*"   
+## 10  ( 1 ) "*" "*"    "*"    "*"    "*"    "*"    "*"    "*"    "*"   
+##           I(x^10)
+## 1  ( 1 )  " "    
+## 2  ( 1 )  " "    
+## 3  ( 1 )  " "    
+## 4  ( 1 )  " "    
+## 5  ( 1 )  " "    
+## 6  ( 1 )  "*"    
+## 7  ( 1 )  "*"    
+## 8  ( 1 )  "*"    
+## 9  ( 1 )  "*"    
+## 10  ( 1 ) "*"
+\end{verbatim}
+
+The best model selected by \(C_p\) contains 4 predictors,
+\(X, X^2, X^3 and X^9\). The best model selected by BIC contains e
+predictors, \(X, X^2, X^3\). The best model selected by adjusted \(R^2\)
+contains 4 predictors, \(X, X^2, X^3 and X^9\)
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  Now fit a lasso model to the simulated data. Use cross-validation to
+  select the optimal value of \(\lambda\). Create plots of the
+  cross-validation error as a function of \(\lambda\). Report the
+  resulting coefficient estimates, and discuss the results obtained.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(glmnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'glmnet' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: Matrix
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'Matrix'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:tidyr':
+## 
+##     expand
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: foreach
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'foreach'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:purrr':
+## 
+##     accumulate, when
+\end{verbatim}
+
+\begin{verbatim}
+## Loaded glmnet 2.0-18
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x=}\KeywordTok{cbind}\NormalTok{(x,x^}\DecValTok{2}\NormalTok{,x^}\DecValTok{3}\NormalTok{,x^}\DecValTok{4}\NormalTok{,x^}\DecValTok{5}\NormalTok{,x^}\DecValTok{6}\NormalTok{,x^}\DecValTok{7}\NormalTok{,x^}\DecValTok{8}\NormalTok{,x^}\DecValTok{9}\NormalTok{,x^}\DecValTok{10}\NormalTok{)}
+\NormalTok{y=y}
+
+\NormalTok{##Cross-validation}
+\NormalTok{lasso.cv =}\StringTok{ }\KeywordTok{cv.glmnet}\NormalTok{(x,y, }\DataTypeTok{alpha=}\DecValTok{1}\NormalTok{)}
+\NormalTok{lasso.cv$lambda.min}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.02146947
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lasso.cv$lambda.1se}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.07195712
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(lasso.cv)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW4_FyonaSun_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{### Refit the model}
+\NormalTok{lasso.mod=}\KeywordTok{glmnet}\NormalTok{(x,y,}\DataTypeTok{alpha=}\DecValTok{1}\NormalTok{, }\DataTypeTok{lambda=}\NormalTok{lasso.cv$lambda.min)}
+\KeywordTok{coef}\NormalTok{(lasso.mod)[,}\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   (Intercept)             x                                           
+##  2.0843824946  2.8766388187 -1.1683609866 -1.9571360979  0.0000000000 
+##                                                                       
+##  0.0000000000  0.0000000000  0.0000000000  0.0000000000  0.0000000000 
+##               
+##  0.0001296694
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lasso.cv$lambda.min}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.02146947
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lasso.cv$lambda.1se}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.07195712
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{coef}\NormalTok{(lasso.mod)[,}\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   (Intercept)             x                                           
+##  2.0843824946  2.8766388187 -1.1683609866 -1.9571360979  0.0000000000 
+##                                                                       
+##  0.0000000000  0.0000000000  0.0000000000  0.0000000000  0.0000000000 
+##               
+##  0.0001296694
+\end{verbatim}
+
+The red dots indicate the cross-validation curve. The upper and lower
+standard deviation curves along the sequence of values. Two selected
+\(\lambda\) values are indicated by the vertical dotted line. One is
+selected by minimizing cv error and the other is one standard devation
+of the minimum cv errorthe. The \(\lambda\) values are 98.97694 and
+108.6271 respectively.With the value of \(\lambda\) giving the minimum
+cv error, the Lasso shrinks the majority predictors to zero, and only
+leaves \(X^2\) and \(X^3\).
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  Now generate a response vector Y according to the model
+  \(Y=\beta_0 +\beta_7X^7+\epsilon\)and and perform best subset
+  selection and the lasso. Discuss the results obtained.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{x <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{eps <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{b7 <-}\StringTok{ }\DecValTok{7}
+\NormalTok{y <-}\StringTok{ }\NormalTok{b0 +}\StringTok{ }\NormalTok{b7 *}\StringTok{ }\NormalTok{x^}\DecValTok{7} \NormalTok{+}\StringTok{ }\NormalTok{eps}
+
+\NormalTok{data.full <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{y =} \NormalTok{y, }\DataTypeTok{x =} \NormalTok{x)}
+\NormalTok{fit.best <-}\StringTok{ }\KeywordTok{regsubsets}\NormalTok{(y ~}\StringTok{ }\NormalTok{x +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{2}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{3}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{4}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{5}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{6}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{7}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{8}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{9}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{10}\NormalTok{), }\DataTypeTok{data =} \NormalTok{data.full, }\DataTypeTok{nvmax =} \DecValTok{10}\NormalTok{)}
+\NormalTok{fit.summary <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(fit.best)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$cp, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Cp"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{cp.min=}\KeywordTok{min}\NormalTok{(fit.summary$cp)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$cp==cp.min], cp.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$bic, }\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"BIC"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{bic.min=}\KeywordTok{min}\NormalTok{(fit.summary$bic)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$bic==bic.min], bic.min, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, fit.summary$adjr2,}\DataTypeTok{xlab=}\StringTok{"Number of Predictors"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Adjusted R Square"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{adjr2.max=}\KeywordTok{max}\NormalTok{(fit.summary$adjr2)}
+\KeywordTok{points}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{)[fit.summary$adjr2==adjr2.max], adjr2.max, }\DataTypeTok{pch=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW4_FyonaSun_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{coef}\NormalTok{(fit.best, }\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## (Intercept)      I(x^7) 
+##     1.95894     7.00077
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#best subset selection with BIC picks the best 1-variable model Y= 1.95894+7.00077X^7}
+\end{Highlighting}
+\end{Shaded}
+
+The model picks X\^{}7 with a coeff is pretty much closer to 7.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#lasso}
+\NormalTok{xmat <-}\StringTok{ }\KeywordTok{model.matrix}\NormalTok{(y ~}\StringTok{ }\NormalTok{x +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{2}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{3}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{4}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{5}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{6}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{7}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{8}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{9}\NormalTok{) +}\StringTok{ }\KeywordTok{I}\NormalTok{(x^}\DecValTok{10}\NormalTok{), }\DataTypeTok{data =} \NormalTok{data.full)[, -}\DecValTok{1}\NormalTok{]}
+\NormalTok{cv.lasso <-}\StringTok{ }\KeywordTok{cv.glmnet}\NormalTok{(xmat, y, }\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{)}
+\NormalTok{bestlam <-}\StringTok{ }\NormalTok{cv.lasso$lambda.min}
+\NormalTok{bestlam}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 12.36884
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit.lasso <-}\StringTok{ }\KeywordTok{glmnet}\NormalTok{(xmat, y, }\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{)}
+\KeywordTok{predict}\NormalTok{(fit.lasso, }\DataTypeTok{s =} \NormalTok{bestlam, }\DataTypeTok{type =} \StringTok{"coefficients"}\NormalTok{)[}\DecValTok{1}\NormalTok{:}\DecValTok{11}\NormalTok{, ]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## (Intercept)           x      I(x^2)      I(x^3)      I(x^4)      I(x^5) 
+##    2.820215    0.000000    0.000000    0.000000    0.000000    0.000000 
+##      I(x^6)      I(x^7)      I(x^8)      I(x^9)     I(x^10) 
+##    0.000000    6.796694    0.000000    0.000000    0.000000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#the LASSO picks the best 1-variable model with Y=2.820215+6.796694 X^7}
+\end{Highlighting}
+\end{Shaded}
+
+The model picks X\^{}7 with a coeff 6.796694, which is a little bit off
+but still can estimate the y.
+
+
+\end{document}
