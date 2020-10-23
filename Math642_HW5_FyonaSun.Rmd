@@ -1,0 +1,286 @@
+---
+title: "Math642_HW5_FyonaSun"
+author: "Fyona Sun"
+date: "2/17/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##7.2
+
+a) $\lambda = \infty, m=0$
+
+To minimize $\hat{g}$ when $\lambda = \infty$, g(x) must equal to zero. $\hat{g}(x) = 0$
+
+```{r}
+g<- function(x) {return(rep(0,length(x)))}
+x<- -5:5
+plot(x,g(x),type = 'l')
+```
+
+b) $\lambda = \infty, m=1$
+
+To minimize $\hat{g}$ when $\lambda = \infty$, g'(x) must equal to zero, that is g(x) must be a constant. $\hat{g}(x) = c$, c=5 in the example.
+```{r}
+g<- function(x) {return(rep(5,length(x)))}
+x<- -5:5
+plot(x,g(x),type = 'l')
+```
+c)$\lambda = \infty, m=2$
+
+To minimize $\hat{g}$ when $\lambda = \infty$, g''(x) must equal to zero, that is g(x) must be a constant. $g(x) = ax+b$, a=1, b=2 in this example.
+```{r}
+g<- function(x) {x+2}
+x<- -5:5
+plot(x,g(x),type = 'l')
+```
+d)$\lambda = \infty, m=3$
+To minimize $\hat{g}$ when $\lambda = \infty$, g'''(x) must equal to zero, that is g(x) must be a constant. $g(x) = ax^2+b$, a=2, b=3 in this example.
+```{r}
+g<- function(x) {2*x^2+3}
+x<- -5:5
+plot(x,g(x),type = 'l')
+```
+e)$\lambda = 0, m=3$
+The penalty term doesn’t have a function, so in this case g is the interpolating spline.
+
+
+##7.5
+(a)
+Since $\hat{g_2}$ has a higher order of the penalty term, it has a higher order of polynomial. Compared with $\hat{g_1}$, $\hat{g_2}$ is more flexible and probably has a smaller training RSS.
+
+(b)
+Since $\hat{g_2}$ is more flexible, it could have over-fitting problem which leads to a higher testing RSS. Thus $\hat{g_1}$ would possibaly have a smaller test RSS.
+
+(c)
+When $\lambda = 0$, the penalty term disappears, that is $\hat{g_1} = \hat{g_2}$. Therefore $\hat{g_1}$ and $\hat{g_2}$ would have the same training and test RSS.
+
+
+##7.9
+This question uses the variables dis (the weighted mean of distances to five Boston employment centers) and nox (nitrogen oxides concen- tration in parts per 10 million) from the Boston data. We will treat dis as the predictor and nox as the response.
+
+(a) Use the poly() function to fit a cubic polynomial regression to predict nox using dis. Report the regression output, and plot the resulting data and polynomial fits.
+```{r}
+library(MASS)
+attach(Boston)
+set.seed(1)
+fit <- lm(nox ~ poly(dis, 3), data = Boston)
+summary(fit)
+
+dis.new <- seq(min(Boston$dis), max(Boston$dis), by = 0.1)
+pred <- predict(fit, list(dis = dis.new))
+plot(nox ~ dis, data = Boston, col = "darkgrey")
+lines(dis.new,pred, col = "red", lwd = 2)
+```
+From the regression result, all the polynomial terms are significant. Thus $\hat{nox}=0.554695 -2.003096*dis +0.856330* dis^2 -0.318049 *dis^3$, which gives us the ploted line. 
+
+(b) Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
+
+```{r}
+rss <- rep(0, 10)
+for (i in 1:10) {
+    fit <- lm(nox ~ poly(dis, i), data = Boston)
+    rss[i] <- sum(fit$residuals^2)
+}
+
+plot(1:10, rss, xlab = "Degree", ylab = "RSS", type = "l", col='red')
+```
+
+The RSS decreases as the degree of the polynomial decreases. It achieves its minimum at degree 10.
+
+(c) Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
+```{r}
+library(boot)
+cv.error <- rep(0, 10)
+for (i in 1:10) {
+    fit <- glm(nox ~ poly(dis, i), data = Boston)
+    cv.error[i] <- cv.glm(Boston, fit, K = 10)$delta[1]
+}
+
+plot(1:10, cv.error, xlab = "Degree", ylab = "Test Meam Squared Error", type = "l")
+cv.error
+```
+
+At degree of 3, the test MSE is 0.003874862 and it's the smallest of the 10 degress.
+
+(d) Use the bs() function to fit a regression spline to predict nox using dis. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.
+```{r}
+library(splines)
+fit <- lm(nox ~ bs(dis, knots = c(4, 7, 11)), data = Boston)
+summary(fit)
+
+pred <- predict(fit, list(dis = dis.new))
+plot(nox ~ dis, data = Boston, col = "darkgrey")
+lines(dis.new, pred, col = "orchid", lwd = 2)
+```
+
+Here we have prespecified knots at dis 4, 7, and 11. This produces a spline with six basis functions. The regression indicates that all the spine terms are significant.
+
+(e) Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.
+
+```{r}
+#Recall that a cubic spline with three knots has seven degrees of freedom
+rss <- rep(0, 16)
+for (i in 3:16) {
+    fit <- lm(nox ~ bs(dis, df = i), data = Boston)
+    rss[i] <- sum(fit$residuals^2)
+}
+plot(3:16, rss[-c(1, 2)], xlab = "Degrees of freedom", ylab = "RSS", type = "l")
+
+rss[-c(1, 2)]
+```
+RSS decreases as the degrees of freedom increases at first, and RSS slightly increases after 14.
+
+(f) Perform cross-validation or another approach in order to select the best degrees of freedom for a regression spline on this data. Describe your results.
+```{r}
+cv <- rep(0, 16)
+for (i in 3:16) {
+    fit <- glm(nox ~ bs(dis, df = i), data = Boston)
+    cv[i] <- cv.glm(Boston, fit, K = 10)$delta[1]
+}
+
+
+plot(3:16, cv[-c(1, 2)], xlab = "Degrees of freedom", ylab = "Test MSE", type = "l")
+```
+
+The test MSE minized at 8 degrees of freedom.
+##7.11
+(a) Generate a response Y and two predictors X1 and X2, with n = 100.
+
+```{r}
+set.seed(1)
+Y <- rnorm(100)
+X1 <- rnorm(100)
+X2 <- rnorm(100)
+```
+(b) Initialize $\beta_1$ to take on a value of your choice. It does not matter
+what value you choose.
+```{r}
+beta1 <- 0.25
+```
+(c) Keeping $\beta_1$ fixed, fit the model $Y-\hat{\beta_1}X_1=\beta_0+\beta_2X_2+\epsilon$
+```{r}
+a<- Y-beta1*X1
+beta2<- lm(a~X2)$coef[2]
+
+beta2
+```
+
+(d) Keeping $\beta_2$ fixed, fit the model $Y-\hat{\beta_2}X_2=\beta_0+\beta_1X_1+\epsilon$
+```{r}
+a<- Y-beta2*X2
+beta1<- lm(a~X1)$coef[2]
+
+beta1
+```
+
+(e)Write a for loop to repeat (c) and (d) 1,000 times. 
+```{r}
+iter<- 1000
+df<- data.frame(0, 0.25, 0)
+names(df)=c('beta0','beta1','beta2')
+for (i in 1:iter) {
+  beta1 <- df[nrow(df), 2]
+  a <- Y - beta1 * X1
+  beta2 <- lm(a ~ X2)$coef[2]
+  a <- Y - beta2 * X2
+  beta1 <- lm(a ~ X1)$coef[2]
+  beta0 <- lm(a ~ X1)$coef[1]
+  df[nrow(df) + 1,] <- list(beta0, beta1, beta2)
+}
+
+head(df)
+
+
+plot(df$beta0, col = 'purple', type = 'l',lwd=2,xlab = 'interations', main='Backfitting')
+lines(df$beta1, col = 'royalblue',lwd=2, lty=2)
+lines(df$beta2, col = 'palegreen3',lwd=2,lty=3)
+legend(600,0.08,legend=c('beta0', 'beta1', 'beta2'),
+       col=c('purple', 'royalblue','palegreen3'),lty=1:3,cex=0.8)
+```
+
+beta0, beta1 and beta2 atained the least squared values very quick and remained unchange.
+
+(f) Compare your answer in (e) to the results of simply performing multiple linear regression to predict Y using X1 and X2. Use the abline() function to overlay those multiple linear regression coefficient estimates on the plot obtained in (e).
+
+```{r}
+lm.fit<-coef(lm(Y~X1+X2))
+plot(df$beta0, col = 'purple', type='l',lwd=2,xlab = 'interations', main='Backfitting vs Multiple Linear Regression')
+lines(df$beta1, col = 'royalblue',lwd=2)
+lines(df$beta2, col = 'palegreen3',lwd=2)
+legend(600,0.08,legend=c('beta0', 'beta1', 'beta2'),
+       col=c('purple', 'royalblue','palegreen3'),lty=1,cex=0.8)
+abline(h=lm.fit[1], col="red", lty=2, lwd=2)
+abline(h=lm.fit[2], col="red", lty=2, lwd=2)
+abline(h=lm.fit[3], col="red", lty=2, lwd=2)
+```
+The red line on this graph show that the coefficients given by multiple regression match with the coefficients obtained by the backfitting estimation.
+
+(g) On this data set, how many backfitting iterations were required in order to obtain a “good” approximation to the multiple regression coefficient estimates?
+
+```{r}
+head(df)
+```
+
+From the iteration results, beta0 converges to constant at iteration 4, beta1 converges at iteration4 and beta2 converges at iteration 5. So for this data set at least 5 iterations are required to obtain a 'good' approximation to the multiple regression coefficient estimates.
+
+
+Write a Gradient Descent program in R to find the minimum of the equation. 
+$y_i =(x_i^2-9)^2$
+
+```{r}
+#plot the function
+f<- function(x) ((x^2) -9)^2
+x<- -5:5
+plot(x,f(x),type = 'l')
+
+#using gradient descent to find the numerical solution
+
+gd<- function(x,f,lr,iter){
+x<- 0.001
+xtrace<- x
+ytrace<- f(x)
+lr<- 0.01
+for (i in 1:iter){
+  delta<- (f(x+lr)-f(x))/lr
+  x<- x - lr*delta
+  xtrace<- c(xtrace,x)
+  ytrace<- c(ytrace,f(x))
+}
+  print(x)
+  print(xtrace)
+  print(ytrace)
+}
+
+iter<- 100
+gd(x,f,lr,iter)
+```
+The gradient descent with the starting x=0.01 and 100 iteration gives x=2.994996 at its minimum, which is close to one of the solution x=3. 
+```{r} 
+#using gradient descent to find the numerical solution
+
+gd<- function(x,f,lr,iter){
+x<- -5
+xtrace<- x
+ytrace<- f(x)
+lr<- 0.01
+for (i in 1:iter){
+  delta<- (f(x+lr)-f(x))/lr
+  x<- x - lr*delta
+  xtrace<- c(xtrace,x)
+  ytrace<- c(ytrace,f(x))
+}
+  print(x)
+  print(xtrace)
+  print(ytrace)
+}
+
+iter<- 100
+gd(x,f,lr,iter)
+```
+
+The gradient descent with the starting x=-5 and 100 iteration gives x=-3.004996 at its minimum, which is close to the other solution x=-3. 
+

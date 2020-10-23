@@ -1,0 +1,31 @@
+---
+title: "Math642_HW9_FyonaSun"
+author: "Fyona Sun"
+date: "3/31/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## P1
+Repeat the neural network classification example below with the Weekly dataset provided in ISLR.  Comment on the results.
+
+```{r}
+library(ISLR)
+library(nnet)
+
+attach(Weekly)
+
+train <- sample(1:1089,800)
+test <- setdiff(1:1089,train)
+ideal <- class.ind(Weekly$Direction)
+weeklyANN = nnet(Weekly[train,-c(1,8,9)],ideal[train,],size=10,rang = 0.1,softmax=TRUE)
+
+#summary(weeklyANN)
+
+table(predict(weeklyANN,Weekly[test,-c(1,8,9)],type='class'),Weekly[test,]$Direction)
+```
+
+

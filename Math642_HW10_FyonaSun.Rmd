@@ -1,0 +1,186 @@
+---
+title: "Math642_HW10_FyonaSun"
+author: "Fyona Sun"
+date: "4/7/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+
+Using the R code posted as an example, create a neural network that learns how to multiply 2 numbers from 1 to 10 together. Try different numbers of nodes per layer and number of hidden layers. Plot the best neural network and describe the model. Describe how accurate the results are in each case.
+
+```{r}
+library(neuralnet)
+#Generate 50 random numbers uniformly distributed between 0 and 10
+#And store them as a dataframe
+set.seed(1)
+traininginput <-  data.frame(x1=runif(50, min=0, max=10), x2=runif(50, min=0, max=10))
+trainingoutput <- traininginput$x1*traininginput$x2
+
+#Column bind the data into one variable
+trainingdata <- cbind(traininginput,trainingoutput)
+head(trainingdata)
+```
+```{r}
+net.multi <- neuralnet(trainingoutput~x1+x2,data=trainingdata, hidden=c(10,10), threshold=0.01,stepmax = 1e16)
+print(net.multi)
+
+#Plot the neural network
+plot(net.multi)
+#Test the neural network on some training data
+set.seed(1)
+testdata <- data.frame(x1=runif(20, min=0, max=10), x2=runif(20, min=0, max=10))
+net.results <- predict(net.multi, testdata) #Run them through the neural network
+
+#Lets see the results
+print(net.results)
+
+#Lets display a better version of the results
+cleanoutput <- cbind(testdata,testdata$x1*testdata$x2,
+                     as.data.frame(net.results))
+colnames(cleanoutput) <- c("Input-x1","Input-x2","ExpectedOutput","NeuralNetOutput")
+print(cleanoutput)
+
+(sum((cleanoutput$NeuralNetOutput - cleanoutput$ExpectedOutput)^2) / nrow(cleanoutput)) ^ 0.5
+```
+
+```{r}
+net.multi <- neuralnet(trainingoutput~x1+x2,data=trainingdata, hidden=c(5,10), threshold=0.01,stepmax = 1e16)
+print(net.multi)
+
+#Plot the neural network
+plot(net.multi)
+#Test the neural network on some training data
+testdata <- data.frame(x1=runif(20, min=0, max=10), x2=runif(20, min=0, max=10))
+net.results <- predict(net.multi, testdata) #Run them through the neural network
+
+#Lets see the results
+print(net.results)
+
+#Lets display a better version of the results
+cleanoutput <- cbind(testdata,testdata$x1*testdata$x2,
+                    as.data.frame(net.results))
+colnames(cleanoutput) <- c("Input-x1","Input-x2","ExpectedOutput","NeuralNetOutput")
+print(cleanoutput)
+
+(sum((cleanoutput$NeuralNetOutput - cleanoutput$ExpectedOutput)^2) / nrow(cleanoutput)) ^ 0.5
+```
+
+```{r}
+net.multi <- neuralnet(trainingoutput~x1+x2,data=trainingdata, hidden=c(10,5), threshold=0.01,stepmax = 1e16)
+print(net.multi)
+
+#Plot the neural network
+plot(net.multi)
+#Test the neural network on some training data
+testdata <- data.frame(x1=runif(20, min=0, max=10), x2=runif(20, min=0, max=10))
+net.results <- predict(net.multi, testdata) #Run them through the neural network
+
+#Lets see the results
+print(net.results)
+
+#Lets display a better version of the results
+cleanoutput <- cbind(testdata,testdata$x1*testdata$x2,
+                     as.data.frame(net.results))
+colnames(cleanoutput) <- c("Input-x1","Input-x2","ExpectedOutput","NeuralNetOutput")
+print(cleanoutput)
+
+(sum((cleanoutput$NeuralNetOutput - cleanoutput$ExpectedOutput)^2) / nrow(cleanoutput)) ^ 0.5
+```
+
+The model with 4 layers and 10 nodes in each layer has the smallest error rate with an accuracy 99.7828%. The input layer has 2 nodes, x1 and x2, the second layer and the third layer has 10 nodes and the output layer has one node.
+
+## Problem 2
+
+Create a neural network that predicts a hitters salary will be above the median or below using the Hitters Dataset.  You will have to create a variable “above median salary” and “below median salary”.
+```{r}
+library(ISLR)
+data("Hitters")
+Hitters <-  Hitters[-which(is.na(Hitters$Salary)), ]
+sum(is.na(Hitters$Salary))
+Hitters$above.ms<- ifelse(Hitters$Salary>=median(Hitters$Salary),1,0)
+head(Hitters)
+```
+
+```{r}
+# Random sampling
+samplesize = 0.60 * nrow(Hitters)
+set.seed(80)
+index = sample( seq_len ( nrow ( Hitters ) ), size = samplesize )
+
+# Create training and test set
+datatrain = Hitters[ index, ]
+datatest = Hitters[ -index, ]
+```
+
+```{r}
+## Fit neural network 
+library(neuralnet)
+
+# fit neural network
+set.seed(1)
+NN = neuralnet(above.ms ~AtBat+Hits+HmRun +Runs+ RBI+ Walks+ Years+ CAtBat+ CHits+ CHmRun+ CRuns+ CRBI+ CWalks+ PutOuts+ Assists+ Errors, data= datatrain, hidden = 3 , linear.output = F,stepmax = 1e16)
+
+# plot neural network
+plot(NN)
+
+# Prediction using neural network
+
+predict_testNN = compute(NN, datatest[,-c(14,15,10,20,21)])
+predict_testNN = (predict_testNN$net.result * (max(Hitters$above.ms) - min(Hitters$above.ms))) + min(Hitters$above.ms)
+
+# Calculate Root Mean Square Error (RMSE)
+RMSE.NN = (sum((datatest$above.ms - predict_testNN)^2) / nrow(datatest)) ^ 0.5
+RMSE.NN
+
+## Cross validation of neural network model
+library(boot)
+library(plyr)
+
+# Initialize variables
+set.seed(50)
+k = 5
+RMSE.NN = NULL
+
+List = list( )
+
+# Fit neural network model within nested for loop
+for(j in 10:210){
+  for (i in 1:k) {
+    index = sample(1:nrow(Hitters),j )
+    
+    trainNN = Hitters[index,]
+    testNN = Hitters[-index,]
+    
+    NN = neuralnet(above.ms ~AtBat+Hits+HmRun +Runs+ RBI+ Walks+ Years+ CAtBat+ CHits+ CHmRun+ CRuns+ CRBI+ CWalks+ PutOuts+ Assists+ Errors, trainNN, hidden = 3, linear.output= F)
+    predict_testNN = compute(NN,testNN[,-c(14,15,10,20,21)])
+    predict_testNN = (predict_testNN$net.result*(max(Hitters$above.ms) - min(Hitters$above.ms))) + min(Hitters$above.ms)
+    
+    RMSE.NN [i]<- (sum((testNN$above.ms - predict_testNN)^2)/nrow(testNN))^0.5
+  }
+  List[[j]] = RMSE.NN
+}
+
+Matrix.RMSE = do.call(cbind, List)
+```
+
+```{r}
+## Prepare boxplot
+boxplot(Matrix.RMSE[,56], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 65)")
+
+library(matrixStats)
+
+med = colMedians(Matrix.RMSE)
+
+X = seq(10,210)
+
+plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", main = "Variation of RMSE with length of training set")
+
+```
+

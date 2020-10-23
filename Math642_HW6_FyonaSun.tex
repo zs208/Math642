@@ -1,0 +1,811 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Math642\_HW6\_FyonaSun},
+            pdfauthor={Fyona Sun},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Math642\_HW6\_FyonaSun}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Fyona Sun}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{2/24/2020}
+
+
+\begin{document}
+\maketitle
+
+\subsection{4.1}\label{section}
+
+Using a little bit of algebra, prove that (4.2) is equivalent to (4.3).
+In other words, the logistic function representation and logit
+representation for the logistic regression model are equivalent.
+
+\[\begin{align*}
+p(X) = \frac{e^{\beta_0+\beta_1X}}{1+e^{\beta_0+\beta_1X}}\\
+1-p(X) =  \frac{1+e^{\beta_0+\beta_1X}-e^{\beta_0+\beta_1X}}{1+e^{\beta_0+\beta_1X}} = \frac{1}{e^{\beta_0+\beta_1X}}\\
+p(X) = e^{\beta_0+\beta_1X} (\frac{1}{e^{\beta_0+\beta_1X}})=e^{\beta_0+\beta_1X} (1-p(X))\\
+\frac{p(X)}{1-p(X)}=e^{\beta_0+\beta_1X}
+\end{align*}\] \#\# 4.6
+
+Suppose we collect data for a group of students in a statistics class
+with variables X1 = hours studied, X2 = undergrad GPA, and Y = receive
+an A. We fit a logistic regression and produce estimated coefficient,
+\(\hat \beta_0 = -6\), \(\hat \beta_1 = 0/05\), \(\hat \beta_2 = 1\)
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  Estimate the probability that a student who studies for 40 h and has
+  an undergrad GPA of 3.5 gets an A in the class.
+\end{enumerate}
+
+\[\hat p(X) = \frac{e^{-6+0.05X_1+X_2}}{1+e^{-6+0.05X_1+X_2}}=0.3775407\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(-}\DecValTok{6}\FloatTok{+0.05}\NormalTok{*}\DecValTok{40}\FloatTok{+3.5}\NormalTok{)/(}\DecValTok{1}\NormalTok{+}\KeywordTok{exp}\NormalTok{(-}\DecValTok{6}\FloatTok{+0.05}\NormalTok{*}\DecValTok{40}\FloatTok{+3.5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3775407
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  How many hours would the student in part (a) need to study to have a
+  50 \% chance of getting an A in the class?
+  \[\hat p(X) = \frac{e^{-6+0.05X_1+X_2}}{1+e^{-6+0.05X_1+X_2}}=0.5\]
+  give X2=3.5, solve for X1
+\end{enumerate}
+
+\[e^{-6+0.05X_1+3.6}=1\\
+X1 = \frac{log(1)+6-3.5}{0.05}=50\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(}\KeywordTok{log}\NormalTok{(}\DecValTok{1}\NormalTok{)+}\DecValTok{6}\FloatTok{-3.5}\NormalTok{)/}\FloatTok{0.05}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 50
+\end{verbatim}
+
+\subsection{4.9}\label{section-1}
+
+This problem has to do with odds. (a) On average, what fraction of
+people with an odds of 0.37 of defaulting on their credit card payment
+will in fact default? \[\frac{p(X)}{1-P(x)}=0.37 \\
+p(X) = \frac{0.37}{1+0.37}=0.27\] Thus on average there are 27\% of
+people defaulting on their creditt card payment.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Suppose that an individual has a 16\% chance of defaulting on her
+  credit card payment. What are the odds that she will default?
+\end{enumerate}
+
+\[\frac{p(X)}{1-P(x)}=\frac{0.16}{1-0.16}=0.19\] The odds that she will
+default is 19\%.
+
+\subsection{4.10}\label{section-2}
+
+This question should be answered using the Weekly data set, which is
+part of the ISLR package. This data is similar in nature to the Smarket
+data from this chapter's lab, except that it contains 1,089 weekly
+returns for 21 years, from the beginning of 1990 to the end of 2010.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  Produce some numerical and graphical summaries of the Weekly data. Do
+  there appear to be any patterns?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ISLR)}
+\KeywordTok{attach}\NormalTok{(Weekly)}
+\KeywordTok{summary}\NormalTok{(Weekly)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       Year           Lag1               Lag2               Lag3         
+##  Min.   :1990   Min.   :-18.1950   Min.   :-18.1950   Min.   :-18.1950  
+##  1st Qu.:1995   1st Qu.: -1.1540   1st Qu.: -1.1540   1st Qu.: -1.1580  
+##  Median :2000   Median :  0.2410   Median :  0.2410   Median :  0.2410  
+##  Mean   :2000   Mean   :  0.1506   Mean   :  0.1511   Mean   :  0.1472  
+##  3rd Qu.:2005   3rd Qu.:  1.4050   3rd Qu.:  1.4090   3rd Qu.:  1.4090  
+##  Max.   :2010   Max.   : 12.0260   Max.   : 12.0260   Max.   : 12.0260  
+##       Lag4               Lag5              Volume       
+##  Min.   :-18.1950   Min.   :-18.1950   Min.   :0.08747  
+##  1st Qu.: -1.1580   1st Qu.: -1.1660   1st Qu.:0.33202  
+##  Median :  0.2380   Median :  0.2340   Median :1.00268  
+##  Mean   :  0.1458   Mean   :  0.1399   Mean   :1.57462  
+##  3rd Qu.:  1.4090   3rd Qu.:  1.4050   3rd Qu.:2.05373  
+##  Max.   : 12.0260   Max.   : 12.0260   Max.   :9.32821  
+##      Today          Direction 
+##  Min.   :-18.1950   Down:484  
+##  1st Qu.: -1.1540   Up  :605  
+##  Median :  0.2410             
+##  Mean   :  0.1499             
+##  3rd Qu.:  1.4050             
+##  Max.   : 12.0260
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(Today~Lag1, }\DataTypeTok{data=}\NormalTok{Weekly)}
+\NormalTok{simplelm =}\StringTok{ }\KeywordTok{lm}\NormalTok{(Today~Lag1, }\DataTypeTok{data=}\NormalTok{Weekly)}
+\KeywordTok{abline}\NormalTok{(simplelm, }\DataTypeTok{lwd=} \DecValTok{3}\NormalTok{, }\DataTypeTok{col=} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW6_FyonaSun_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{pairs}\NormalTok{(Weekly)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW6_FyonaSun_files/figure-latex/unnamed-chunk-3-2.pdf}
+(b) Use the full data set to perform a logistic regression with
+Direction as the response and the five lag variables plus Volume as
+predictors. Use the summary function to print the results. Do any of the
+predictors appear to be statistically significant? If so, which ones?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit<-}\StringTok{ }\KeywordTok{glm}\NormalTok{(Direction ~}\StringTok{ }\NormalTok{Lag1 +}\StringTok{ }\NormalTok{Lag2 +}\StringTok{ }\NormalTok{Lag3 +}\StringTok{ }\NormalTok{Lag4 +}\StringTok{ }\NormalTok{Lag5 +}\StringTok{ }\NormalTok{Volume, }\DataTypeTok{data =} \NormalTok{Weekly, }\DataTypeTok{family =} \NormalTok{binomial)}
+\KeywordTok{summary}\NormalTok{(fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + 
+##     Volume, family = binomial, data = Weekly)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6949  -1.2565   0.9913   1.0849   1.4579  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)   
+## (Intercept)  0.26686    0.08593   3.106   0.0019 **
+## Lag1        -0.04127    0.02641  -1.563   0.1181   
+## Lag2         0.05844    0.02686   2.175   0.0296 * 
+## Lag3        -0.01606    0.02666  -0.602   0.5469   
+## Lag4        -0.02779    0.02646  -1.050   0.2937   
+## Lag5        -0.01447    0.02638  -0.549   0.5833   
+## Volume      -0.02274    0.03690  -0.616   0.5377   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1496.2  on 1088  degrees of freedom
+## Residual deviance: 1486.4  on 1082  degrees of freedom
+## AIC: 1500.4
+## 
+## Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+The variable lag2 has a p-value of 0.0296 \textless{} 0/05 which is
+statistically significant.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Compute the confusion matrix and overall fraction of correct
+  predictions. Explain what the confusion matrix is telling you about
+  the types of mistakes made by logistic regression.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{probs<-}\StringTok{ }\KeywordTok{predict}\NormalTok{(fit, }\DataTypeTok{type=}\StringTok{'response'}\NormalTok{)}
+\NormalTok{pred<-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{'Down'}\NormalTok{,}\KeywordTok{length}\NormalTok{(probs))}
+\NormalTok{pred[probs>}\FloatTok{0.5}\NormalTok{] <-}\StringTok{ 'Up'}
+\KeywordTok{table}\NormalTok{(pred, Direction)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       Direction
+## pred   Down  Up
+##   Down   54  48
+##   Up    430 557
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \NormalTok{cm<-}\StringTok{ }\KeywordTok{table}\NormalTok{(pred, Direction)}
+  \NormalTok{TP<-cm[}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{]}
+  \NormalTok{TN<-cm[}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{]}
+  \NormalTok{FP<-cm[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{]}
+  \NormalTok{FN<-cm[}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{]}
+  \NormalTok{N<-}\KeywordTok{sum}\NormalTok{(cm)}
+  \NormalTok{acc<-(TP+TN)/N}
+  \NormalTok{sens<-TP/(TP+FN)}
+  \NormalTok{prec<-TP/(TP+FP)}
+  \NormalTok{FPR<-FP/(FP+TN)}
+  \NormalTok{spec<-}\DecValTok{1}\NormalTok{-FPR}
+  
+  \NormalTok{acc}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.5610652
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \NormalTok{sens}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9206612
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \NormalTok{prec}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.5643364
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \NormalTok{FPR}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8884298
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \NormalTok{spec}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.1115702
+\end{verbatim}
+
+The accuracy rate is 56.10652\%. The true positive rate is 92.06612\%
+which also known as the sensiticity. The false positive rate is
+88.84298\%, which equals to 1-specificity.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Now fit the logistic regression model using a training data period
+  from 1990 to 2008, with Lag2 as the only predictor. Compute the
+  confusion matrix and the overall fraction of correct predictions for
+  the held out data (that is, the data from 2009 and 2010).
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{train.data =}\StringTok{ }\NormalTok{Weekly[Weekly$Year<}\DecValTok{2009}\NormalTok{,]}
+\NormalTok{test.data =}\StringTok{ }\NormalTok{Weekly[Weekly$Year>}\DecValTok{2008}\NormalTok{,]}
+\NormalTok{fit2 =}\StringTok{ }\KeywordTok{glm}\NormalTok{(Direction~Lag2, }\DataTypeTok{data=} \NormalTok{train.data, }\DataTypeTok{family =} \StringTok{"binomial"}\NormalTok{)}
+\KeywordTok{summary}\NormalTok{(fit2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Direction ~ Lag2, family = "binomial", data = train.data)
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.536  -1.264   1.021   1.091   1.368  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)   
+## (Intercept)  0.20326    0.06428   3.162  0.00157 **
+## Lag2         0.05810    0.02870   2.024  0.04298 * 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1354.7  on 984  degrees of freedom
+## Residual deviance: 1350.5  on 983  degrees of freedom
+## AIC: 1354.5
+## 
+## Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{probs =}\StringTok{ }\KeywordTok{predict}\NormalTok{(fit2, }\DataTypeTok{type=}\StringTok{"response"}\NormalTok{, }\DataTypeTok{newdata =} \NormalTok{test.data)}
+\NormalTok{testdirs =}\StringTok{ }\NormalTok{Weekly$Direction[Weekly$Year>}\DecValTok{2008}\NormalTok{]}
+\NormalTok{pred<-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{'Down'}\NormalTok{,}\KeywordTok{length}\NormalTok{(probs))}
+\NormalTok{pred[probs>}\FloatTok{0.5}\NormalTok{] <-}\StringTok{ 'Up'}
+\KeywordTok{table}\NormalTok{(pred, test.data$Direction)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       
+## pred   Down Up
+##   Down    9  5
+##   Up     34 56
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#the overall fraction of correct predictions for the held out data}
+\KeywordTok{mean}\NormalTok{(pred==test.data$Direction)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.625
+\end{verbatim}
+
+The accuracy is 62.5\% (e) Repeat (d) using LDA.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{require}\NormalTok{(MASS)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: MASS
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit.lda <-}\StringTok{ }\KeywordTok{lda}\NormalTok{(Direction ~}\StringTok{ }\NormalTok{Lag2, }\DataTypeTok{data =} \NormalTok{train.data)}
+
+\NormalTok{pred <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(fit.lda, }\DataTypeTok{newdata =} \NormalTok{test.data)}
+\NormalTok{pred_values <-}\StringTok{ }\NormalTok{pred$class}
+\KeywordTok{table}\NormalTok{(pred_values, test.data$Direction)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            
+## pred_values Down Up
+##        Down    9  5
+##        Up     34 56
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{acc <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'Accuracy:'}\NormalTok{, }\KeywordTok{mean}\NormalTok{(pred_values ==}\StringTok{ }\NormalTok{test.data$Direction))}
+\NormalTok{acc}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Accuracy: 0.625"
+\end{verbatim}
+
+The LDA model also gives 62.5\% (f) Repeat (d) using QDA.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit.qda <-}\StringTok{ }\KeywordTok{qda}\NormalTok{(Direction ~}\StringTok{ }\NormalTok{Lag2, }\DataTypeTok{data =} \NormalTok{train.data)}
+
+\NormalTok{pred <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(fit.qda, }\DataTypeTok{newdata =} \NormalTok{test.data)}
+\NormalTok{pred_values <-}\StringTok{ }\NormalTok{pred$class}
+\KeywordTok{table}\NormalTok{(pred_values, test.data$Direction)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            
+## pred_values Down Up
+##        Down    0  0
+##        Up     43 61
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{acc <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'Accuracy:'}\NormalTok{, }\KeywordTok{mean}\NormalTok{(pred_values ==}\StringTok{ }\NormalTok{test.data$Direction))}
+\NormalTok{acc}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Accuracy: 0.586538461538462"
+\end{verbatim}
+
+The QDA model does not do as well as the LDA model. The accuracy of this
+model is 58.65\%. (g) Repeat (d) using KNN with K = 1.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{require}\NormalTok{(class)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: class
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knn_pred <-}\StringTok{ }\KeywordTok{knn}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{data.frame}\NormalTok{(train.data$Lag2), }
+                \DataTypeTok{test =} \KeywordTok{data.frame}\NormalTok{(test.data$Lag2), }
+                \DataTypeTok{cl =} \NormalTok{train.data$Direction, }\DataTypeTok{k =} \DecValTok{1}\NormalTok{)}
+
+\NormalTok{acc <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'Accuracy:'}\NormalTok{, }\KeywordTok{mean}\NormalTok{(knn_pred ==}\StringTok{ }\NormalTok{test.data$Direction))}
+\NormalTok{acc}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Accuracy: 0.5"
+\end{verbatim}
+
+The KNN model with k=1 gives a model with accuracy = 0.5
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{7}
+\item
+  Which of these methods appears to provide the best results on this
+  data? The LDA model with Lag2 seems to provide the best result.
+\item
+  Experiment with different combinations of predictors, including
+  possible transformations and interactions, for each of the methods.
+  Report the variables, method, and associated confu- sion matrix that
+  appears to provide the best results on the held out data. Note that
+  you should also experiment with values for K in the KNN classifier.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'dplyr' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:MASS':
+## 
+##     select
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'ggplot2' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{acc <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\StringTok{'1'} \NormalTok{=}\StringTok{ }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{for (i in }\DecValTok{1}\NormalTok{:}\DecValTok{20}\NormalTok{) \{}
+    \NormalTok{knn_pred <-}\StringTok{ }\KeywordTok{knn}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{data.frame}\NormalTok{(train.data$Lag2), }\DataTypeTok{test =} \KeywordTok{data.frame}\NormalTok{(test.data$Lag2), }\DataTypeTok{cl =} \NormalTok{train.data$Direction, }\DataTypeTok{k =} \NormalTok{i)}
+    \NormalTok{acc[}\KeywordTok{as.character}\NormalTok{(i)] =}\StringTok{ }\KeywordTok{mean}\NormalTok{(knn_pred ==}\StringTok{ }\NormalTok{test.data$Direction)}
+\NormalTok{\}}
+
+\NormalTok{acc <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(acc)}
+\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{acc =} \NormalTok{acc)%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{k =} \KeywordTok{row_number}\NormalTok{())%>%}
+\StringTok{    }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(k, acc)) +}
+\StringTok{    }\KeywordTok{geom_col}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{fill =} \NormalTok{k ==}\StringTok{ }\KeywordTok{which.max}\NormalTok{(acc))) +}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'K'}\NormalTok{, }\DataTypeTok{y =} \StringTok{'Accuracy'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'KNN Accuracy for different values of K'}\NormalTok{) +}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \DecValTok{1}\NormalTok{:}\DecValTok{20}\NormalTok{) +}
+\StringTok{    }\KeywordTok{coord_cartesian}\NormalTok{(}\DataTypeTok{ylim =} \KeywordTok{c}\NormalTok{(}\KeywordTok{min}\NormalTok{(acc), }\KeywordTok{max}\NormalTok{(acc))) +}
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW6_FyonaSun_files/figure-latex/unnamed-chunk-11-1.pdf}
+\#\# 4.12
+
+This problem involves writing functions. (a) Write a function, Power(),
+that prints out the result of raising 2 to the 3rd power. In other
+words, your function should compute 2\^{}3 and print out the results.
+
+Hint: Recall that x\^{}a raises x to the power a. Use the print()
+function to output the result.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Power <-}\StringTok{ }\NormalTok{function() \{}
+    \KeywordTok{print}\NormalTok{(}\DecValTok{2}\NormalTok{^}\DecValTok{3}\NormalTok{)}
+\NormalTok{\}}
+\KeywordTok{Power}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 8
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Create a new function, Power2(), that allows you to pass any two
+  numbers, x and a, and prints out the value of x\^{}a. You can do this
+  by beginning your function with the line
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Power2 <-}\StringTok{ }\NormalTok{function(x, a) \{}
+    \KeywordTok{print}\NormalTok{(x^a)}
+\NormalTok{\}}
+\KeywordTok{Power2}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{8}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6561
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Using the Power2() function that you just wrote, compute
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{Power2}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{Power2}\NormalTok{(}\DecValTok{8}\NormalTok{,}\DecValTok{17}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.2518e+15
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{Power2}\NormalTok{(}\DecValTok{131}\NormalTok{,}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2248091
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Now create a new function, Power3(), that actually returns the result
+  x\^{}a as an R object, rather than simply printing it to the screen.
+  That is, if you store the value x\^{}a in an object called result
+  within your function, then you can simply return() this result, using
+  the following line: The line above should be the last line in your
+  function, before the \} symbol.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Power3 <-}\StringTok{ }\NormalTok{function(x , a) \{}
+    \NormalTok{result <-}\StringTok{ }\NormalTok{x^a}
+    \KeywordTok{return}\NormalTok{(result)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  Now using the Power3() function, create a plot of f(x) = x .
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\DecValTok{1}\NormalTok{:}\DecValTok{10}
+\KeywordTok{plot}\NormalTok{(x, }\KeywordTok{Power3}\NormalTok{(x, }\DecValTok{2}\NormalTok{),}\DataTypeTok{log =} \StringTok{"xy"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"Log of x"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Log of x^2"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Log of x^2 vs Log of x"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW6_FyonaSun_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  Create a function, PlotPower(), that allows you to create a plot of x
+  against x\^{}a for a fixed a and for a range of values of x. For
+  instance, if you call
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{PlotPower <-}\StringTok{ }\NormalTok{function(x, a) \{}
+    \KeywordTok{plot}\NormalTok{(x, }\KeywordTok{Power3}\NormalTok{(x, a), }\DataTypeTok{xlab =} \StringTok{"Log of x"}\NormalTok{, }\DataTypeTok{ylab =} \KeywordTok{paste}\NormalTok{(}\StringTok{"Log of x"}\NormalTok{,}\StringTok{'^'}\NormalTok{,a))}
+\NormalTok{\}}
+
+\KeywordTok{PlotPower}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{10}\NormalTok{, }\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Math642_HW6_FyonaSun_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+
+\end{document}
